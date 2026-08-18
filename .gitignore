@@ -1,0 +1,25 @@
+# Flutter / Dart
+**/build/
+.dart_tool/
+.packages
+**/ios/Pods/
+**/ios/.symlinks/
+**/android/.gradle/
+
+# Melos
+melos_*.iml
+.melos_tool/
+
+# Firebase — كل حد هيربط مشروعه بنفسه عن طريق flutterfire configure
+**/firebase_options.dart
+**/.firebase/
+**/google-services.json
+**/GoogleService-Info.plist
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
