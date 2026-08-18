@@ -1,0 +1,22 @@
+name: decoze
+publish_to: none
+
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+
+workspace:
+  - apps/customer_app
+  - apps/admin_app
+  - packages/core
+
+dev_dependencies:
+  melos: ^8.3.0
+
+melos:
+  scripts:
+    analyze:
+      run: melos exec -- "flutter analyze ."
+      description: Run flutter analyze in every package.
+    format:
+      run: melos exec -- "dart format ."
+      description: Format all Dart code.
