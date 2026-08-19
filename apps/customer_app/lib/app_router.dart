@@ -1,5 +1,9 @@
 import 'dart:async';
 
+import 'package:customer_app/features/category/data/repositories/category_repository_impl.dart';
+import 'package:customer_app/features/home/presentation/cubit/home_cubit.dart';
+import 'package:customer_app/features/home/presentation/screens/home_screen.dart';
+import 'package:customer_app/features/product/data/repositories/product_repository_impl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -64,9 +68,15 @@ class AppRouter {
         builder: (context, state) => const SignUpScreen(),
       ),
       GoRoute(
-        path: '/home',
-        builder: (context, state) => const _HomePlaceholder(),
-      ),
+  path: '/home',
+  builder: (context, state) => BlocProvider(
+    create: (_) => HomeCubit(
+      categoryRepository: CategoryRepositoryImpl(),
+      productRepository: ProductRepositoryImpl(),
+    ),
+    child: const HomeScreen(),
+  ),
+),
     ],
   );
 }
@@ -85,31 +95,5 @@ class _AuthCubitListenable extends ChangeNotifier {
   void dispose() {
     _subscription.cancel();
     super.dispose();
-  }
-}
-
-class _HomePlaceholder extends StatelessWidget {
-  const _HomePlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Welcome, you\'re signed in!',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => context.read<AuthCubit>().signOut(),
-              child: const Text('Sign out'),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
