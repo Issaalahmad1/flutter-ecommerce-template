@@ -1,4 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:customer_app/features/category/presentation/screens/category_screen.dart';
+import 'package:customer_app/features/product/presentation/widgets/product_grid.dart';
 import 'package:decoze_core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -59,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    _ProductGrid(products: featuredProducts),
+                    ProductGrid(products: featuredProducts),
                   ],
                 ),
               ),
@@ -85,81 +87,29 @@ class _CategoryRow extends StatelessWidget {
         separatorBuilder: (_, _) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
           final category = categories[index];
-          return Column(
-            children: [
-              CircleAvatar(
-                radius: 30,
-                backgroundImage: CachedNetworkImageProvider(category.imageUrl),
-              ),
-              const SizedBox(height: 6),
-              Text(category.name, style: const TextStyle(fontSize: 12)),
-            ],
+          return GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => CategoryScreen(categoryId: category.id),
+                ),
+              );
+            },
+            child: Column(
+              children: [
+                CircleAvatar(
+                  radius: 30,
+                  backgroundImage: CachedNetworkImageProvider(
+                    category.imageUrl,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(category.name, style: const TextStyle(fontSize: 12)),
+              ],
+            ),
           );
         },
       ),
-    );
-  }
-}
-
-class _ProductGrid extends StatelessWidget {
-  final List<ProductEntity> products;
-  const _ProductGrid({required this.products});
-
-  @override
-  Widget build(BuildContext context) {
-    const brand = BrandConfig.decoze;
-
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
-        childAspectRatio: 0.7,
-      ),
-      itemCount: products.length,
-      itemBuilder: (context, index) {
-        final product = products[index];
-        return Card(
-          clipBehavior: Clip.antiAlias,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AspectRatio(
-                aspectRatio: 1,
-                child: CachedNetworkImage(
-                  imageUrl: product.thumbnail,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      product.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${brand.currencySymbol} ${product.price.toStringAsFixed(2)}',
-                      style: TextStyle(
-                        color: brand.accent,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }
