@@ -6,6 +6,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'app_router.dart';
 import 'features/auth/data/repositories/auth_repository_impl.dart';
 import 'features/auth/presentation/cubit/auth_cubit.dart';
+import 'features/auth/presentation/cubit/auth_state.dart';
+import 'features/cart/data/repositories/cart_repository_impl.dart';
+import 'features/cart/presentation/cubit/cart_cubit.dart';
+import 'features/product/data/repositories/product_repository_impl.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -25,20 +29,47 @@ class DecozeApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => AuthCubit(AuthRepositoryImpl())..listenToAuthChanges(),
-      child: Builder(
-        builder: (context) {
-          final authCubit = context.read<AuthCubit>();
-          final router = AppRouter(authCubit).router;
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => AuthCubit(AuthRepositoryImpl())..listenToAuthChanges(),
+        ),
+        BlocProvider(
+          create: (_) => CartCubit(
+            cartRepository: CartRepositoryImpl(),
+            productRepository: ProductRepositoryImpl(),
+          ),
+        ),
+      ],
+      child: const _AppWithRouter(),
+    );
+  }
+}
 
-          return MaterialApp.router(
-            title: brand.appName,
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme.build(brand),
-            routerConfig: router,
-          );
-        },
+/// Widget منفصل بيستخدم Builder جديد عشان نقدر نستخدم context.read
+/// للـ Cubits اللي فوق (بعد ما اتعملوا فعليًا في MultiBlocProvider).
+class _AppWithRouter extends StatelessWidget {
+  const _AppWithRouter();
+
+  @override
+  Widget build(BuildContext context) {
+    final authCubit = context.read<AuthCubit>();
+    final router = AppRouter(authCubit).router;
+
+    return BlocListener<AuthCubit, AuthState>(
+      listener: (context, state) {
+        final cartCubit = context.read<CartCubit>();
+        if (state is AuthAuthenticated) {
+          cartCubit.attachUser(state.user.uid);
+        } else if (state is AuthUnauthenticated) {
+          cartCubit.attachUser(null);
+        }
+      },
+      child: MaterialApp.router(
+        title: DecozeApp.brand.appName,
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.build(DecozeApp.brand),
+        routerConfig: router,
       ),
     );
   }
