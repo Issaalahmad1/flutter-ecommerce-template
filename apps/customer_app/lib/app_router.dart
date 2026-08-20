@@ -25,9 +25,11 @@ class AppRouter {
     refreshListenable: _AuthCubitListenable(authCubit),
     redirect: (context, state) {
       final authState = authCubit.state;
-      final isAuthScreen = state.matchedLocation == '/sign-in' ||
+      final isAuthScreen =
+          state.matchedLocation == '/sign-in' ||
           state.matchedLocation == '/sign-up';
-      final isSplashOrOnboarding = state.matchedLocation == '/splash' ||
+      final isSplashOrOnboarding =
+          state.matchedLocation == '/splash' ||
           state.matchedLocation == '/welcome';
 
       // لسه ماعرفناش حالة المستخدم (أول تحميل) — سيبه في مكانه.
@@ -68,15 +70,15 @@ class AppRouter {
         builder: (context, state) => const SignUpScreen(),
       ),
       GoRoute(
-  path: '/home',
-  builder: (context, state) => BlocProvider(
-    create: (_) => HomeCubit(
-      categoryRepository: CategoryRepositoryImpl(),
-      productRepository: ProductRepositoryImpl(),
-    ),
-    child: const HomeScreen(),
-  ),
-),
+        path: '/home',
+        builder: (context, state) => BlocProvider(
+          create: (_) => HomeCubit(
+            categoryRepository: CategoryRepositoryImpl(),
+            productRepository: ProductRepositoryImpl(),
+          ),
+          child: const HomeScreen(),
+        ),
+      ),
     ],
   );
 }

@@ -1,5 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:customer_app/features/cart/presentation/screens/cart_screen.dart';
 import 'package:customer_app/features/category/presentation/screens/category_screen.dart';
+import 'package:customer_app/features/product/presentation/screens/product_detail_screen.dart';
 import 'package:customer_app/features/product/presentation/widgets/product_grid.dart';
 import 'package:decoze_core/core.dart';
 import 'package:flutter/material.dart';
@@ -32,11 +34,16 @@ class _HomeScreenState extends State<HomeScreen> {
           brand.appName,
           style: TextStyle(color: brand.accent, fontWeight: FontWeight.bold),
         ),
-        actions: const [
-          Icon(Icons.search_outlined),
-          SizedBox(width: 16),
-          Icon(Icons.favorite_border),
-          SizedBox(width: 16),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.shopping_bag_outlined),
+            onPressed: () {
+              Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const CartScreen()));
+            },
+          ),
+          const SizedBox(width: 8),
         ],
       ),
       body: BlocBuilder<HomeCubit, HomeState>(
@@ -61,7 +68,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    ProductGrid(products: featuredProducts),
+                    ProductGrid(
+                      products: featuredProducts,
+                      onProductTap: (product) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                ProductDetailScreen(productId: product.id),
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),
