@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:customer_app/features/checkout/presentation/screens/checkout_screen.dart';
 import 'package:decoze_core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -132,7 +133,9 @@ class _CartSummary extends StatelessWidget {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
-              // هيتفعّل في خطوة الـ Checkout الجاية.
+              Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const CheckoutScreen()));
             },
             child: const Text('Check Out'),
           ),
