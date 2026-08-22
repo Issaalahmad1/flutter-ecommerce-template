@@ -58,4 +58,15 @@ class ProductRemoteDataSource {
         .get();
     return snapshot.docs;
   }
+    Future<void> createProduct(Map<String, dynamic> data) {
+    return firestore.collection('products').add(data);
+  }
+
+  Future<void> updateProduct(String id, Map<String, dynamic> data) {
+    return firestore.collection('products').doc(id).update(data);
+  }
+
+  Future<void> deleteProduct(String id) {
+    return firestore.collection('products').doc(id).delete();
+  }
 }
