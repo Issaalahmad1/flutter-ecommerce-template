@@ -11,13 +11,13 @@ import 'features/cart/data/repositories/cart_repository_impl.dart';
 import 'features/cart/presentation/cubit/cart_cubit.dart';
 import 'features/product/data/repositories/product_repository_impl.dart';
 import 'firebase_options.dart';
+import 'features/favourite/data/repositories/favourite_repository_impl.dart';
+import 'features/favourite/presentation/cubit/favourite_cubit.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(const DecozeApp());
 }
@@ -40,6 +40,12 @@ class DecozeApp extends StatelessWidget {
             productRepository: ProductRepositoryImpl(),
           ),
         ),
+        BlocProvider(
+          create: (_) => FavouriteCubit(
+            favouriteRepository: FavouriteRepositoryImpl(),
+            productRepository: ProductRepositoryImpl(),
+          ),
+        ),
       ],
       child: const _AppWithRouter(),
     );
@@ -59,10 +65,13 @@ class _AppWithRouter extends StatelessWidget {
     return BlocListener<AuthCubit, AuthState>(
       listener: (context, state) {
         final cartCubit = context.read<CartCubit>();
+        final favouriteCubit = context.read<FavouriteCubit>();
         if (state is AuthAuthenticated) {
           cartCubit.attachUser(state.user.uid);
+          favouriteCubit.attachUser(state.user.uid);
         } else if (state is AuthUnauthenticated) {
           cartCubit.attachUser(null);
+          favouriteCubit.attachUser(null);
         }
       },
       child: MaterialApp.router(

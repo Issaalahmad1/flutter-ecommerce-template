@@ -3,6 +3,7 @@ import 'package:customer_app/features/cart/presentation/screens/cart_screen.dart
 import 'package:customer_app/features/category/presentation/screens/category_screen.dart';
 import 'package:customer_app/features/product/presentation/screens/product_detail_screen.dart';
 import 'package:customer_app/features/product/presentation/widgets/product_grid.dart';
+import 'package:customer_app/features/profile/presentation/screens/profile_screen.dart';
 import 'package:decoze_core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -35,6 +36,14 @@ class _HomeScreenState extends State<HomeScreen> {
           style: TextStyle(color: brand.accent, fontWeight: FontWeight.bold),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.person_outline),
+            onPressed: () {
+              Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const ProfileScreen()));
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.shopping_bag_outlined),
             onPressed: () {

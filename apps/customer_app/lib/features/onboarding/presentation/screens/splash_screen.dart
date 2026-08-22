@@ -1,7 +1,7 @@
 import 'package:decoze_core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-import 'welcome_screen.dart';
 
 /// شاشة بسيطة بتتعرض لحظة فتح التطبيق، وبعد تأخير قصير بتنقل تلقائي
 /// لشاشة الترحيب. لاحظ إنها StatefulWidget مش Stateless — محتاجينها
@@ -23,9 +23,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _navigateAfterDelay() async {
     await Future.delayed(const Duration(seconds: 2));
     if (!mounted) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const WelcomeScreen()),
-    );
+    context.go('/welcome');
   }
 
   @override

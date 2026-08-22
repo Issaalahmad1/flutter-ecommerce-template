@@ -1,6 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:customer_app/features/favourite/presentation/cubit/favourite_cubit.dart';
+import 'package:customer_app/features/favourite/presentation/cubit/favourite_state.dart';
 import 'package:decoze_core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// كارت منتج واحد — بيتكرر في Home وCategory وSearch وSpecial Offer
 /// (راجع قسم 03 في الدليل). أي تعديل بصري على شكل الكارت، مكانه هنا بس.
@@ -22,12 +25,41 @@ class ProductCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AspectRatio(
-              aspectRatio: 1,
-              child: CachedNetworkImage(
-                imageUrl: product.thumbnail,
-                fit: BoxFit.cover,
-              ),
+            Stack(
+              children: [
+                AspectRatio(
+                  aspectRatio: 1,
+                  child: CachedNetworkImage(
+                    imageUrl: product.thumbnail,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Positioned(
+                  top: 6,
+                  right: 6,
+                  child: BlocBuilder<FavouriteCubit, FavouriteState>(
+                    builder: (context, state) {
+                      final isFav =
+                          state is FavouriteLoaded &&
+                          state.isFavorite(product.id);
+                      return GestureDetector(
+                        onTap: () => context
+                            .read<FavouriteCubit>()
+                            .toggleFavorite(product.id),
+                        child: CircleAvatar(
+                          radius: 14,
+                          backgroundColor: Colors.white,
+                          child: Icon(
+                            isFav ? Icons.favorite : Icons.favorite_border,
+                            size: 16,
+                            color: isFav ? Colors.red : Colors.grey,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
             Padding(
               padding: const EdgeInsets.all(8),
@@ -54,7 +86,11 @@ class ProductCard extends StatelessWidget {
                       if (product.rating > 0)
                         Row(
                           children: [
-                            const Icon(Icons.star, size: 14, color: Colors.amber),
+                            const Icon(
+                              Icons.star,
+                              size: 14,
+                              color: Colors.amber,
+                            ),
                             const SizedBox(width: 2),
                             Text(
                               product.rating.toStringAsFixed(1),
