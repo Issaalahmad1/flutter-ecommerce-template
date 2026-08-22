@@ -7,7 +7,6 @@ import 'package:decoze_core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../data/repositories/product_repository_impl.dart';
 import '../cubit/product_cubit.dart';
 import '../cubit/product_state.dart';
 

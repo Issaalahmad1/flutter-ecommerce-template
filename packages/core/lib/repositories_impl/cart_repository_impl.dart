@@ -1,6 +1,5 @@
 import 'package:decoze_core/core.dart';
 
-import '../datasources/cart_remote_datasource.dart';
 
 class CartRepositoryImpl implements CartRepository {
   final CartRemoteDataSource remoteDataSource;

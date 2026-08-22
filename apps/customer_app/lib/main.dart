@@ -4,14 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'app_router.dart';
-import 'features/auth/data/repositories/auth_repository_impl.dart';
 import 'features/auth/presentation/cubit/auth_cubit.dart';
 import 'features/auth/presentation/cubit/auth_state.dart';
-import 'features/cart/data/repositories/cart_repository_impl.dart';
 import 'features/cart/presentation/cubit/cart_cubit.dart';
-import 'features/product/data/repositories/product_repository_impl.dart';
 import 'firebase_options.dart';
-import 'features/favourite/data/repositories/favourite_repository_impl.dart';
 import 'features/favourite/presentation/cubit/favourite_cubit.dart';
 
 Future<void> main() async {

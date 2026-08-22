@@ -2,10 +2,8 @@ import 'package:decoze_core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../product/data/repositories/product_repository_impl.dart';
 import '../../../product/presentation/screens/product_detail_screen.dart';
 import '../../../product/presentation/widgets/product_grid.dart';
-import '../../data/repositories/category_repository_impl.dart';
 import '../cubit/category_cubit.dart';
 import '../cubit/category_state.dart';
 
