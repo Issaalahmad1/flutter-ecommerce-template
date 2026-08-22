@@ -1,7 +1,7 @@
 import 'package:decoze_core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-import '../../../auth/presentation/screens/sign_up_screen.dart';
 
 class _SlideData {
   final IconData icon;
@@ -49,10 +49,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _goToSignUp() {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const SignUpScreen()),
-    );
-  }
+  context.go('/sign-up');
+}
 
   void _next() {
     if (_currentPage == _slides.length - 1) {

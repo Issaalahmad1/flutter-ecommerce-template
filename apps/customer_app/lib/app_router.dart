@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:customer_app/features/category/data/repositories/category_repository_impl.dart';
 import 'package:customer_app/features/home/presentation/cubit/home_cubit.dart';
 import 'package:customer_app/features/home/presentation/screens/home_screen.dart';
+import 'package:customer_app/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:customer_app/features/product/data/repositories/product_repository_impl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -28,9 +29,9 @@ class AppRouter {
       final isAuthScreen =
           state.matchedLocation == '/sign-in' ||
           state.matchedLocation == '/sign-up';
-      final isSplashOrOnboarding =
-          state.matchedLocation == '/splash' ||
-          state.matchedLocation == '/welcome';
+      final isSplashOrOnboarding = state.matchedLocation == '/splash' ||
+    state.matchedLocation == '/welcome' ||
+    state.matchedLocation == '/onboarding';
 
       // لسه ماعرفناش حالة المستخدم (أول تحميل) — سيبه في مكانه.
       if (authState is AuthInitial || authState is AuthLoading) {
@@ -60,6 +61,10 @@ class AppRouter {
       GoRoute(
         path: '/welcome',
         builder: (context, state) => const WelcomeScreen(),
+      ),
+      GoRoute(
+        path: '/onboarding',
+        builder: (context, state) => const OnboardingScreen(),
       ),
       GoRoute(
         path: '/sign-in',

@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:customer_app/features/cart/presentation/cubit/cart_cubit.dart';
+import 'package:customer_app/features/favourite/presentation/cubit/favourite_cubit.dart';
+import 'package:customer_app/features/favourite/presentation/cubit/favourite_state.dart';
 import 'package:decoze_core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -53,6 +55,23 @@ class _ProductDetailBody extends StatelessWidget {
                         IconButton(
                           icon: const Icon(Icons.arrow_back),
                           onPressed: () => Navigator.of(context).pop(),
+                        ),
+                        const Spacer(),
+                        BlocBuilder<FavouriteCubit, FavouriteState>(
+                          builder: (context, favState) {
+                            final isFav =
+                                favState is FavouriteLoaded &&
+                                favState.isFavorite(product.id);
+                            return IconButton(
+                              icon: Icon(
+                                isFav ? Icons.favorite : Icons.favorite_border,
+                                color: isFav ? Colors.red : null,
+                              ),
+                              onPressed: () => context
+                                  .read<FavouriteCubit>()
+                                  .toggleFavorite(product.id),
+                            );
+                          },
                         ),
                       ],
                     ),

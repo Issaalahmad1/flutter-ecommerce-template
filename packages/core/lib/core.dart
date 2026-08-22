@@ -18,3 +18,4 @@ export 'repositories/category_repository.dart';
 export 'repositories/auth_repository.dart';
 export 'repositories/cart_repository.dart';
 export 'repositories/order_repository.dart';
+export 'repositories/favourite_repository.dart';

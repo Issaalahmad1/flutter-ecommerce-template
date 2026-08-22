@@ -1,7 +1,7 @@
-import 'package:customer_app/features/auth/presentation/screens/sign_up_screen.dart';
 import 'package:decoze_core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../cubit/auth_cubit.dart';
 import '../cubit/auth_state.dart';
@@ -124,11 +124,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     Center(
                       child: TextButton(
                         onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const SignUpScreen(),
-                            ),
-                          );
+                          context.go('/sign-up');
                         },
                         child: const Text("Don't have an account? Sign up"),
                       ),
