@@ -1,6 +1,5 @@
 import 'package:decoze_core/core.dart';
 
-import '../datasources/auth_remote_datasource.dart';
 
 /// التنفيذ الفعلي لـ AuthRepository (الـ interface المعرّف في decoze_core).
 /// هنا بس بنحوّل بين كائنات Firebase الخام وبين UserEntity بتاعنا —

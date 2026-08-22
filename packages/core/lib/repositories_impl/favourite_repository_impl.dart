@@ -1,6 +1,5 @@
 import 'package:decoze_core/core.dart';
 
-import '../datasources/favourite_remote_datasource.dart';
 
 class FavouriteRepositoryImpl implements FavouriteRepository {
   final FavouriteRemoteDataSource remoteDataSource;

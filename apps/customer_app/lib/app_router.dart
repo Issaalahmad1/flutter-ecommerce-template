@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:customer_app/features/category/data/repositories/category_repository_impl.dart';
 import 'package:customer_app/features/home/presentation/cubit/home_cubit.dart';
 import 'package:customer_app/features/home/presentation/screens/home_screen.dart';
 import 'package:customer_app/features/onboarding/presentation/screens/onboarding_screen.dart';
-import 'package:customer_app/features/product/data/repositories/product_repository_impl.dart';
+import 'package:decoze_core/repositories_impl/category_repository_impl.dart';
+import 'package:decoze_core/repositories_impl/product_repository_impl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
