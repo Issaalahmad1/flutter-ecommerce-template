@@ -1,11 +1,10 @@
 import 'package:decoze_core/core.dart';
 
-
 class CategoryRepositoryImpl implements CategoryRepository {
   final CategoryRemoteDataSource remoteDataSource;
 
   CategoryRepositoryImpl({CategoryRemoteDataSource? remoteDataSource})
-      : remoteDataSource = remoteDataSource ?? CategoryRemoteDataSource();
+    : remoteDataSource = remoteDataSource ?? CategoryRemoteDataSource();
 
   @override
   Future<List<CategoryEntity>> getCategories() async {
@@ -24,19 +23,18 @@ class CategoryRepositoryImpl implements CategoryRepository {
     return CategoryEntity.fromJson(id, data);
   }
 
-  // دوال الأدمن — هنفعّلها لما نبني admin_app، مش محتاجينها في تطبيق العميل دلوقتي.
   @override
   Future<void> createCategory(CategoryEntity category) {
-    throw UnimplementedError('استخدم لوحة الأدمن لإضافة فئات جديدة.');
+    return remoteDataSource.createCategory(category.id, category.toJson());
   }
 
   @override
   Future<void> updateCategory(CategoryEntity category) {
-    throw UnimplementedError('استخدم لوحة الأدمن لتعديل الفئات.');
+    return remoteDataSource.updateCategory(category.id, category.toJson());
   }
 
   @override
   Future<void> deleteCategory(String id) {
-    throw UnimplementedError('استخدم لوحة الأدمن لحذف الفئات.');
+    return remoteDataSource.deleteCategory(id);
   }
 }

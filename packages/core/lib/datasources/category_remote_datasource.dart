@@ -18,4 +18,15 @@ class CategoryRemoteDataSource {
     final doc = await firestore.collection('categories').doc(id).get();
     return doc.data();
   }
+    Future<void> createCategory(String id, Map<String, dynamic> data) {
+    return firestore.collection('categories').doc(id).set(data);
+  }
+
+  Future<void> updateCategory(String id, Map<String, dynamic> data) {
+    return firestore.collection('categories').doc(id).update(data);
+  }
+
+  Future<void> deleteCategory(String id) {
+    return firestore.collection('categories').doc(id).delete();
+  }
 }
