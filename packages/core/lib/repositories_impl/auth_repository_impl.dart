@@ -60,7 +60,42 @@ class AuthRepositoryImpl implements AuthRepository {
     _cachedUser = user;
     return user;
   }
+    @override
+  Future<UserEntity> signInWithGoogle() async {
+    final fbUser = await remoteDataSource.signInWithGoogle();
 
+    // لو أول مرة يسجّل بجوجل، مفيش مستند "users/{uid}" ليه لسه —
+    // ننشئه بنفس طريقة التسجيل العادي بالإيميل.
+    var doc = await remoteDataSource.getUserDocument(fbUser.uid);
+    if (doc == null) {
+      await remoteDataSource.createUserDocument(
+        uid: fbUser.uid,
+        email: fbUser.email ?? '',
+      );
+      doc = await remoteDataSource.getUserDocument(fbUser.uid);
+    }
+
+    final user = UserEntity.fromJson(fbUser.uid, doc ?? {});
+    _cachedUser = user;
+    return user;
+  }
+    @override
+  Future<UserEntity> signInWithTwitter() async {
+    final fbUser = await remoteDataSource.signInWithTwitter();
+
+    var doc = await remoteDataSource.getUserDocument(fbUser.uid);
+    if (doc == null) {
+      await remoteDataSource.createUserDocument(
+        uid: fbUser.uid,
+        email: fbUser.email ?? '',
+      );
+      doc = await remoteDataSource.getUserDocument(fbUser.uid);
+    }
+
+    final user = UserEntity.fromJson(fbUser.uid, doc ?? {});
+    _cachedUser = user;
+    return user;
+  }
   @override
   Future<void> signOut() async {
     await remoteDataSource.signOut();

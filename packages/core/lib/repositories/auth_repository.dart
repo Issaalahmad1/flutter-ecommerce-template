@@ -5,15 +5,11 @@ abstract class AuthRepository {
 
   UserEntity? get currentUser;
 
-  Future<UserEntity> signUp({
-    required String email,
-    required String password,
-  });
+  Future<UserEntity> signUp({required String email, required String password});
 
-  Future<UserEntity> signIn({
-    required String email,
-    required String password,
-  });
+  Future<UserEntity> signIn({required String email, required String password});
+  Future<UserEntity> signInWithGoogle();
+  Future<UserEntity> signInWithTwitter();
 
   Future<void> signOut();
 

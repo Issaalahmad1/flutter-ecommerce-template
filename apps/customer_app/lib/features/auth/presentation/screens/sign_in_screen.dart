@@ -60,11 +60,14 @@ class _SignInScreenState extends State<SignInScreen> {
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                  spacing: 26,
+                  children: <Widget>[
                     const SizedBox(height: 24),
-                    Text(
-                      'Login to ${brand.appName}',
-                      style: Theme.of(context).textTheme.headlineSmall,
+                    Center(
+                      child: Text(
+                        'Login to ${brand.appName}',
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
                     ),
                     const SizedBox(height: 32),
                     TextFormField(
@@ -84,7 +87,6 @@ class _SignInScreenState extends State<SignInScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 14),
                     TextFormField(
                       controller: _passwordController,
                       obscureText: _obscurePassword,
@@ -109,7 +111,6 @@ class _SignInScreenState extends State<SignInScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 28),
                     ElevatedButton(
                       onPressed: isLoading ? null : _submit,
                       child: isLoading
@@ -120,7 +121,57 @@ class _SignInScreenState extends State<SignInScreen> {
                             )
                           : const Text('Sign in'),
                     ),
-                    const SizedBox(height: 16),
+                    Row(
+                      children: const [
+                        Expanded(child: Divider()),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 12),
+                          child: Text('or continue with'),
+                        ),
+                        Expanded(child: Divider()),
+                      ],
+                    ),
+                    Row(
+                        spacing: 24,
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.all(24),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              onPressed: isLoading
+                                  ? null
+                                  : () =>
+                                        context.read<AuthCubit>().signInWithTwitter(),
+                              child:  Container(
+                                decoration: BoxDecoration(
+                                  color:Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Image.asset('assets/auth_icons/twitter.png', height:24)),
+                            ),
+                          ),
+                          Expanded(
+                            child: OutlinedButton(
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.all(24),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              onPressed: isLoading
+                                  ? null
+                                  : () =>
+                                        context.read<AuthCubit>().signInWithGoogle(),
+                              child:  Image.asset('assets/auth_icons/Google.png', height:24),
+                            ),
+                          ),
+                          
+                        ],
+                      ),
                     Center(
                       child: TextButton(
                         onPressed: () {

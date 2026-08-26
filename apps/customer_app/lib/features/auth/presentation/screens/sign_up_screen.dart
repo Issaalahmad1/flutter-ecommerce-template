@@ -42,6 +42,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     const brand = BrandConfig.decoze;
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
+
       body: SafeArea(
         child: BlocConsumer<AuthCubit, AuthState>(
           listener: (context, state) {
@@ -54,98 +56,153 @@ class _SignUpScreenState extends State<SignUpScreen> {
           builder: (context, state) {
             final isLoading = state is AuthLoading;
 
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 24),
-                    Text(
-                      'Create your ${brand.appName} account',
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    const SizedBox(height: 32),
-                    TextFormField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                        hintText: 'Email',
-                        prefixIcon: Icon(Icons.mail_outline),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'من فضلك أدخل البريد الإلكتروني';
-                        }
-                        if (!value.contains('@')) {
-                          return 'صيغة البريد الإلكتروني غير صحيحة';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 14),
-                    TextFormField(
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      decoration: InputDecoration(
-                        hintText: 'Password',
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-                          ),
-                          onPressed: () => setState(
-                            () => _obscurePassword = !_obscurePassword,
-                          ),
+            return Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 26,
+                    children:<Widget> [
+                      const SizedBox(height: 24),
+                      Center(
+                        child: Text(
+                          'Create your \n${brand.appName} account',
+                          style: Theme.of(context).textTheme.headlineLarge,
                         ),
                       ),
-                      validator: (value) {
-                        if (value == null || value.length < 6) {
-                          return 'كلمة المرور لازم تكون 6 أحرف على الأقل';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 14),
-                    TextFormField(
-                      controller: _confirmController,
-                      obscureText: _obscurePassword,
-                      decoration: const InputDecoration(
-                        hintText: 'Confirm password',
-                        prefixIcon: Icon(Icons.lock_outline),
-                      ),
-                      validator: (value) {
-                        if (value != _passwordController.text) {
-                          return 'كلمة المرور غير متطابقة';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 28),
-                    ElevatedButton(
-                      onPressed: isLoading ? null : _submit,
-                      child: isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text('Sign up'),
-                    ),
-                    const SizedBox(height: 16),
-                    Center(
-                      child: TextButton(
-                        onPressed: () {
-                          context.go('/sign-in');
+                      const SizedBox(height: 32),
+                      TextFormField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: const InputDecoration(
+                          hintText: 'Email',
+                          prefixIcon: Icon(Icons.mail_outline),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'من فضلك أدخل البريد الإلكتروني';
+                          }
+                          if (!value.contains('@')) {
+                            return 'صيغة البريد الإلكتروني غير صحيحة';
+                          }
+                          return null;
                         },
-                        child: const Text('Already have an account? Sign in'),
                       ),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: _obscurePassword,
+                        decoration: InputDecoration(
+                          hintText: 'Password',
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                            ),
+                            onPressed: () => setState(
+                              () => _obscurePassword = !_obscurePassword,
+                            ),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.length < 6) {
+                            return 'كلمة المرور لازم تكون 6 أحرف على الأقل';
+                          }
+                          return null;
+                        },
+                      ),
+                      TextFormField(
+                        controller: _confirmController,
+                        obscureText: _obscurePassword,
+                        decoration: const InputDecoration(
+                          hintText: 'Confirm password',
+                          prefixIcon: Icon(Icons.lock_outline),
+                        ),
+                        validator: (value) {
+                          if (value != _passwordController.text) {
+                            return 'كلمة المرور غير متطابقة';
+                          }
+                          return null;
+                        },
+                      ),
+                      ElevatedButton(
+                        onPressed: isLoading ? null : _submit,
+                        child: isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text('Sign up'),
+                      ),
+                      Row(
+                        children: const [
+                          Expanded(child: Divider()),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 12),
+                            child: Text('or continue with'),
+                          ),
+                          Expanded(child: Divider()),
+                        ],
+                      ),
+                      Row(
+                        spacing: 24,
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.all(24),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              onPressed: isLoading
+                                  ? null
+                                  : () =>
+                                        context.read<AuthCubit>().signInWithTwitter(),
+                              child:  Container(
+                                decoration: BoxDecoration(
+                                  color:Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Image.asset('assets/auth_icons/twitter.png', height:24, color: Colors.black)),
+                            ),
+                          ),
+                          Expanded(
+                            child: OutlinedButton(
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.all(24),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              onPressed: isLoading
+                                  ? null
+                                  : () =>
+                                        context.read<AuthCubit>().signInWithGoogle(),
+                              child:  Image.asset('assets/auth_icons/Google.png', height:24),
+                            ),
+                          ),
+                          
+                        ],
+                      ),
+                      
+                      Center(
+                        child: TextButton(
+                          onPressed: () {
+                            context.go('/sign-in');
+                          },
+                          child: const Text('Already have an account? Sign in'),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
                 ),
               ),
             );

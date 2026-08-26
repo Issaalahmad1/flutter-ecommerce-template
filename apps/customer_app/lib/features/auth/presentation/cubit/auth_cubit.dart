@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:decoze_core/core.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'auth_state.dart';
@@ -10,7 +11,8 @@ class AuthCubit extends Cubit<AuthState> {
   final AuthRepository _authRepository;
 
   AuthCubit(this._authRepository) : super(const AuthInitial());
-    StreamSubscription<UserEntity?>? _authSubscription;
+
+  StreamSubscription<UserEntity?>? _authSubscription;
 
   /// بيتنفذ مرة واحدة عند بداية التطبيق — بيراقب authStateChanges()
   /// من Firebase طول الوقت، فلو المستخدم مسجّل دخول من قبل (Session
@@ -25,17 +27,13 @@ class AuthCubit extends Cubit<AuthState> {
     });
   }
 
-  @override
-  Future<void> close() {
-    _authSubscription?.cancel();
-    return super.close();
-  }
   Future<void> signUp({required String email, required String password}) async {
     emit(const AuthLoading());
     try {
       final user = await _authRepository.signUp(email: email, password: password);
       emit(AuthAuthenticated(user));
     } catch (e) {
+      debugPrint('== Sign up error: $e ==');
       emit(AuthError(_readableError(e)));
     }
   }
@@ -46,10 +44,32 @@ class AuthCubit extends Cubit<AuthState> {
       final user = await _authRepository.signIn(email: email, password: password);
       emit(AuthAuthenticated(user));
     } catch (e) {
+      debugPrint('== Sign in error: $e ==');
       emit(AuthError(_readableError(e)));
     }
   }
 
+  Future<void> signInWithGoogle() async {
+    emit(const AuthLoading());
+    try {
+      final user = await _authRepository.signInWithGoogle();
+      emit(AuthAuthenticated(user));
+    } catch (e) {
+      debugPrint('== Google sign in error: $e ==');
+      emit(AuthError(e is StateError ? e.message : 'حدث خطأ غير متوقع.'));
+    }
+  }
+
+    Future<void> signInWithTwitter() async {
+    emit(const AuthLoading());
+    try {
+      final user = await _authRepository.signInWithTwitter();
+      emit(AuthAuthenticated(user));
+    } catch (e) {
+      debugPrint('== Twitter sign in error: $e ==');
+      emit(AuthError(e is StateError ? e.message : 'حدث خطأ غير متوقع.'));
+    }
+  }
   Future<void> signOut() async {
     await _authRepository.signOut();
     emit(const AuthUnauthenticated());
@@ -86,4 +106,10 @@ class AuthCubit extends Cubit<AuthState> {
     }
     return 'حدث خطأ غير متوقع، حاول مرة أخرى.';
   }
-} 
+
+  @override
+  Future<void> close() {
+    _authSubscription?.cancel();
+    return super.close();
+  }
+}

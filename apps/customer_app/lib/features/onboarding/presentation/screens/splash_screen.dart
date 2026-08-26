@@ -2,7 +2,6 @@ import 'package:decoze_core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-
 /// شاشة بسيطة بتتعرض لحظة فتح التطبيق، وبعد تأخير قصير بتنقل تلقائي
 /// لشاشة الترحيب. لاحظ إنها StatefulWidget مش Stateless — محتاجينها
 /// Stateful عشان نقدر نستخدم initState لجدولة التنقل التلقائي.
@@ -32,13 +31,20 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       backgroundColor: brand.primaryBackground,
       body: Center(
-        child: Text(
-          brand.appName,
-          style: TextStyle(
-            color: brand.accent,
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-          ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(brand.logoAssetPath, width: 100, height: 100),
+            const SizedBox(height: 16),
+            Text(
+              brand.appName,
+              style: TextStyle(
+                color: brand.accent,
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
       ),
     );

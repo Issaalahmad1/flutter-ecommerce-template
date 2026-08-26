@@ -35,7 +35,7 @@ class AppTheme {
           backgroundColor: brand.accent,
           foregroundColor: brand.onAccent,
           minimumSize: const Size.fromHeight(52),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
           textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
         ),
       ),

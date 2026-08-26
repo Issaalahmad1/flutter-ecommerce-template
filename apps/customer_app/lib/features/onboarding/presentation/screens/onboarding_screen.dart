@@ -2,9 +2,8 @@ import 'package:decoze_core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-
 class _SlideData {
-  final IconData icon;
+  final String icon;
   final String title;
   final String description;
   const _SlideData(this.icon, this.title, this.description);
@@ -12,22 +11,19 @@ class _SlideData {
 
 const List<_SlideData> _slides = [
   _SlideData(
-    Icons.explore_outlined,
-    'Effortlessly organize your decor\nand shopping with decoze',
-    'Confidently navigate your decor journey, ensuring a stylish '
-        'and productive path to your dream space.',
+    'assets/onboarding/onboarding1.png',
+    'Effortlessly organize your decor \nand shopping with decoze',
+    'Confidently navigate your decor journey, ensuring a \nstylish and productive path to your dream space \nwith decoze',
   ),
   _SlideData(
-    Icons.groups_outlined,
-    'Stay connected with design team\nanytime, anywhere with decoze',
-    'In today\'s dynamic decor world, staying connected with '
-        'your design team is key to success.',
+    'assets/onboarding/Group 5407.png',
+    'Stay connected with design team \nanytime, anywhere with decoze',
+    "In today's dynamic decor world, staying connected \nwith your design team is key to success with \ndecoze.",
   ),
   _SlideData(
-    Icons.auto_awesome_outlined,
-    'Discover all the features\ndecoze has to offer',
-    'Dive into decoze\'s multitude of features by exploring '
-        'its diverse functionalities.',
+    'assets/onboarding/Group 5408.png',
+    'Discover all the features \ndecoze has to offer',
+    "Dive into decoze's multitude of features by \nexploring its diverse functionalities.",
   ),
 ];
 
@@ -49,8 +45,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _goToSignUp() {
-  context.go('/sign-up');
-}
+    context.go('/sign-up');
+  }
 
   void _next() {
     if (_currentPage == _slides.length - 1) {
@@ -72,16 +68,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            Align(
-              alignment: Alignment.topLeft,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: TextButton(
-                  onPressed: _goToSignUp,
-                  child: const Text('Skip'),
-                ),
-              ),
-            ),
             Expanded(
               child: PageView.builder(
                 controller: _pageController,
@@ -94,8 +80,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(slide.icon, size: 100, color: brand.accent),
+                        Image.asset(slide.icon),
                         const SizedBox(height: 32),
+
                         Text(
                           slide.title,
                           textAlign: TextAlign.center,
@@ -136,6 +123,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: ElevatedButton(
                 onPressed: _next,
                 child: Text(isLastPage ? 'Get Started' : 'Next'),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 24, left: 24, right: 24),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: brand.surface,
+                  foregroundColor: brand.accent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(100),
+                    side: BorderSide(color: brand.textSecondary),
+                  ),
+                ),
+                onPressed: _goToSignUp,
+                child: Text("Skip"),
               ),
             ),
           ],

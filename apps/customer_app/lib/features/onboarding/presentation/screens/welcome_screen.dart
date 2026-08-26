@@ -15,20 +15,32 @@ class WelcomeScreen extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               // مكان الرسمة التوضيحية — استبدلها بصورة حقيقية لاحقًا
               // (Image.asset('assets/onboarding/welcome.png'))
-              Icon(Icons.chair_outlined, size: 120, color: brand.accent),
-              const SizedBox(height: 40),
-              Text(
-                'Welcome to\n${brand.appName}',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineMedium,
+              const Spacer(),
+              Column(
+                children: [
+                  Image.asset(brand.logoAssetPath, width: 120, height: 120),
+                  const SizedBox(height: 0),
+                  Text(
+                    'Welcome to',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                  Text(
+                    brand.appName,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.headlineMedium?.copyWith(color: brand.accent),
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 72),
               Text(
-                'Style your spaces & shop for all your decor needs',
+                'Style your spaces & shop for all \nyour decor needs',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: brand.textSecondary, fontSize: 15),
               ),
@@ -36,9 +48,7 @@ class WelcomeScreen extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const OnboardingScreen(),
-                    ),
+                    MaterialPageRoute(builder: (_) => const OnboardingScreen()),
                   );
                 },
                 child: const Text('Get Started'),

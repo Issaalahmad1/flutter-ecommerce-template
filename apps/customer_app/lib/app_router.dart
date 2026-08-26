@@ -13,7 +13,6 @@ import 'features/auth/presentation/cubit/auth_cubit.dart';
 import 'features/auth/presentation/cubit/auth_state.dart';
 import 'features/auth/presentation/screens/sign_in_screen.dart';
 import 'features/auth/presentation/screens/sign_up_screen.dart';
-import 'features/onboarding/presentation/screens/splash_screen.dart';
 import 'features/onboarding/presentation/screens/welcome_screen.dart';
 
 class AppRouter {
@@ -22,14 +21,14 @@ class AppRouter {
   AppRouter(this.authCubit);
 
   late final GoRouter router = GoRouter(
-    initialLocation: '/splash',
+    initialLocation: '/welcome',
     refreshListenable: _AuthCubitListenable(authCubit),
     redirect: (context, state) {
       final authState = authCubit.state;
       final isAuthScreen =
           state.matchedLocation == '/sign-in' ||
           state.matchedLocation == '/sign-up';
-      final isSplashOrOnboarding = state.matchedLocation == '/splash' ||
+      final isSplashOrOnboarding = 
     state.matchedLocation == '/welcome' ||
     state.matchedLocation == '/onboarding';
 
@@ -54,10 +53,7 @@ class AppRouter {
       return null; // من غير تحويل
     },
     routes: [
-      GoRoute(
-        path: '/splash',
-        builder: (context, state) => const SplashScreen(),
-      ),
+      
       GoRoute(
         path: '/welcome',
         builder: (context, state) => const WelcomeScreen(),
