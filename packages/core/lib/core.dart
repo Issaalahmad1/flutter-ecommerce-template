@@ -34,3 +34,8 @@ export 'repositories_impl/product_repository_impl.dart';
 export 'repositories_impl/cart_repository_impl.dart';
 export 'repositories_impl/order_repository_impl.dart';
 export 'repositories_impl/favourite_repository_impl.dart';
+
+export 'entities/banner_entity.dart';
+export 'repositories/banner_repository.dart';
+export 'datasources/banner_remote_datasource.dart';
+export 'repositories_impl/banner_repository_impl.dart';

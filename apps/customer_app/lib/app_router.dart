@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:customer_app/features/home/presentation/cubit/home_cubit.dart';
-import 'package:customer_app/features/home/presentation/screens/home_screen.dart';
 import 'package:customer_app/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:customer_app/features/shell/presentation/screens/main_shell.dart';
 import 'package:decoze_core/repositories_impl/category_repository_impl.dart';
 import 'package:decoze_core/repositories_impl/product_repository_impl.dart';
 import 'package:flutter/material.dart';
@@ -77,7 +77,7 @@ class AppRouter {
             categoryRepository: CategoryRepositoryImpl(),
             productRepository: ProductRepositoryImpl(),
           ),
-          child: const HomeScreen(),
+          child: const MainShell(),
         ),
       ),
     ],

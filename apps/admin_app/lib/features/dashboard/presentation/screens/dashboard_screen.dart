@@ -1,3 +1,4 @@
+import 'package:admin_app/features/banners/presentation/screens/banners_screen.dart';
 import 'package:decoze_core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,6 +25,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     ProductsScreen(),
     CategoriesScreen(),
     OrdersScreen(),
+    BannersScreen(),
   ];
 
   @override
@@ -38,12 +40,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
             minExtendedWidth: 200,
             backgroundColor: brand.surface,
             selectedIndex: _selectedIndex,
-            onDestinationSelected: (index) => setState(() => _selectedIndex = index),
+            onDestinationSelected: (index) =>
+                setState(() => _selectedIndex = index),
             leading: Padding(
               padding: const EdgeInsets.symmetric(vertical: 24),
               child: Text(
                 '${brand.appName} Admin',
-                style: TextStyle(color: brand.accent, fontWeight: FontWeight.bold, fontSize: 16),
+                style: TextStyle(
+                  color: brand.accent,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
             ),
             trailing: Expanded(
@@ -60,6 +67,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             destinations: const [
+              
               NavigationRailDestination(
                 icon: Icon(Icons.dashboard_outlined),
                 selectedIcon: Icon(Icons.dashboard),
@@ -79,6 +87,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 icon: Icon(Icons.receipt_long_outlined),
                 selectedIcon: Icon(Icons.receipt_long),
                 label: Text('Orders'),
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.view_carousel_outlined),
+                selectedIcon: Icon(Icons.view_carousel),
+                label: Text('Banners'),
               ),
             ],
           ),
@@ -122,8 +135,9 @@ class _DashboardHomeBody extends StatelessWidget {
     return BlocBuilder<DashboardCubit, DashboardState>(
       builder: (context, state) {
         return switch (state) {
-          DashboardInitial() || DashboardLoading() =>
-            const Center(child: CircularProgressIndicator()),
+          DashboardInitial() || DashboardLoading() => const Center(
+            child: CircularProgressIndicator(),
+          ),
           DashboardError(:final message) => Center(child: Text(message)),
           DashboardLoaded(
             :final totalRevenue,
@@ -136,13 +150,17 @@ class _DashboardHomeBody extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Overview', style: Theme.of(context).textTheme.titleLarge),
+                  Text(
+                    'Overview',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
                   const SizedBox(height: 16),
                   Row(
                     children: [
                       _StatCard(
                         label: 'Revenue',
-                        value: '${brand.currencySymbol}${totalRevenue.toStringAsFixed(2)}',
+                        value:
+                            '${brand.currencySymbol}${totalRevenue.toStringAsFixed(2)}',
                       ),
                       const SizedBox(width: 12),
                       _StatCard(label: 'Orders', value: '$totalOrders'),
@@ -151,20 +169,28 @@ class _DashboardHomeBody extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 24),
-                  Text('Recent orders', style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    'Recent orders',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   const SizedBox(height: 8),
                   if (recentOrders.isEmpty)
                     const Text('لا توجد طلبات حتى الآن.')
                   else
-                    ...recentOrders.map((order) => ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: Text('Order #${order.id.substring(0, 6)}'),
-                          subtitle: Text(order.status.name),
-                          trailing: Text(
-                            '${brand.currencySymbol}${order.total.toStringAsFixed(2)}',
-                            style: TextStyle(color: brand.accent, fontWeight: FontWeight.bold),
+                    ...recentOrders.map(
+                      (order) => ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text('Order #${order.id.substring(0, 6)}'),
+                        subtitle: Text(order.status.name),
+                        trailing: Text(
+                          '${brand.currencySymbol}${order.total.toStringAsFixed(2)}',
+                          style: TextStyle(
+                            color: brand.accent,
+                            fontWeight: FontWeight.bold,
                           ),
-                        )),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -194,9 +220,15 @@ class _StatCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: TextStyle(color: brand.textSecondary, fontSize: 13)),
+            Text(
+              label,
+              style: TextStyle(color: brand.textSecondary, fontSize: 13),
+            ),
             const SizedBox(height: 6),
-            Text(value, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
           ],
         ),
       ),

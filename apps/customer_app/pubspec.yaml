@@ -77,13 +77,18 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/brand/logo.png
-    - assets/brand/adaptive-foreground.png
+    - assets/brand/splash_logo.png
+    - assets/brand/launcher_icon.png
     - assets/onboarding/onboarding1.png
     - assets/onboarding/Group 5407.png
     - assets/onboarding/Group 5408.png
     - assets/auth_icons/Google.png
     - assets/auth_icons/Facebook.png
     - assets/auth_icons/twitter.png
+    - assets/bottom_navigation_bar_icon/Home Angle 3.png
+    - assets/bottom_navigation_bar_icon/Widget.png
+    - assets/bottom_navigation_bar_icon/Bag.png
+    - assets/bottom_navigation_bar_icon/User Rounded.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -113,12 +118,12 @@ flutter:
   # see https://flutter.dev/to/font-from-package
 flutter_native_splash:
   color: "#20232A"
-  image: assets/brand/app_logo.png
+  image: assets/brand/splash_logo.png
 
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/brand/adaptive-foreground.png"
+  image_path: "assets/brand/launcher_icon.png"
   min_sdk_android: 21
   adaptive_icon_background: "#20232A"
-  adaptive_icon_foreground: "assets/brand/adaptive-foreground.png"
+  adaptive_icon_foreground: "assets/brand/launcher_icon.png"
