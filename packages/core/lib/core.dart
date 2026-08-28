@@ -39,3 +39,5 @@ export 'entities/banner_entity.dart';
 export 'repositories/banner_repository.dart';
 export 'datasources/banner_remote_datasource.dart';
 export 'repositories_impl/banner_repository_impl.dart';
+export 'repositories/storage_repository.dart';
+export 'repositories_impl/storage_repository_impl.dart';
