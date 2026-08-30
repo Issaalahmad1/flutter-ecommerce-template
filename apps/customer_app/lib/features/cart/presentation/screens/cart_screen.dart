@@ -78,10 +78,28 @@ class _CartTile extends StatelessWidget {
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 4),
-              Text(
-                '${brand.currencySymbol} ${line.product.price.toStringAsFixed(2)}',
-                style: TextStyle(color: brand.accent),
-              ),
+              line.discountPercent != null && line.discountPercent! > 0
+                  ? Row(
+                      children: [
+                        Text(
+                          '${brand.currencySymbol} ${line.unitPrice.toStringAsFixed(2)}',
+                          style: TextStyle(color: brand.accent),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '${brand.currencySymbol} ${line.product.price.toStringAsFixed(2)}',
+                          style: TextStyle(
+                            color: brand.textSecondary,
+                            fontSize: 11,
+                            decoration: TextDecoration.lineThrough,
+                          ),
+                        ),
+                      ],
+                    )
+                  : Text(
+                      '${brand.currencySymbol} ${line.product.price.toStringAsFixed(2)}',
+                      style: TextStyle(color: brand.accent),
+                    ),
             ],
           ),
         ),
@@ -126,6 +144,12 @@ class _CartSummary extends StatelessWidget {
       child: Column(
         children: [
           _SummaryRow(label: 'Subtotal', value: state.subtotal),
+          if (state.totalDiscount > 0)
+            _SummaryRow(
+              label: 'Discount',
+              value: -state.totalDiscount,
+              isDiscount: true,
+            ),
           _SummaryRow(label: 'Tax and Fees', value: state.tax),
           _SummaryRow(label: 'Delivery', value: state.delivery),
           const Divider(height: 24),
@@ -149,20 +173,23 @@ class _SummaryRow extends StatelessWidget {
   final String label;
   final double value;
   final bool isBold;
+  final bool isDiscount;
 
   const _SummaryRow({
     required this.label,
     required this.value,
     this.isBold = false,
+    this.isDiscount = false,
   });
-
   @override
   Widget build(BuildContext context) {
     const brand = BrandConfig.decoze;
     final style = TextStyle(
       fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
       fontSize: isBold ? 18 : 14,
-      color: isBold ? brand.accent : brand.textSecondary,
+      color: isDiscount
+          ? Colors.green
+          : (isBold ? brand.accent : brand.textSecondary),
     );
 
     return Padding(

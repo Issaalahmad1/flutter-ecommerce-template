@@ -6,12 +6,15 @@ import 'category_state.dart';
 class CategoryCubit extends Cubit<CategoryState> {
   final CategoryRepository _categoryRepository;
   final ProductRepository _productRepository;
+  final BannerRepository _bannerRepository;
 
   CategoryCubit({
     required CategoryRepository categoryRepository,
     required ProductRepository productRepository,
+    BannerRepository? bannerRepository,
   })  : _categoryRepository = categoryRepository,
         _productRepository = productRepository,
+        _bannerRepository = bannerRepository ?? BannerRepositoryImpl(),
         super(const CategoryInitial());
 
   Future<void> loadCategory(String categoryId) async {
@@ -20,20 +23,22 @@ class CategoryCubit extends Cubit<CategoryState> {
       final results = await Future.wait([
         _categoryRepository.getCategoryById(categoryId),
         _productRepository.getProducts(categoryId: categoryId),
+        _bannerRepository.getBanners(),
       ]);
+
+      final banners = results[2] as List<BannerEntity>;
+      final activeDiscount = DiscountCalculator.findActiveDiscount(banners, categoryId);
 
       emit(CategoryLoaded(
         category: results[0] as CategoryEntity,
         products: results[1] as List<ProductEntity>,
+        discountPercent: activeDiscount?.discountPercent,
       ));
     } catch (e) {
       emit(const CategoryError('حدث خطأ في تحميل الفئة.'));
     }
   }
 
-  /// لما المستخدم يدوس على تاب فرعي (زي "Sofa" أو "Tables")،
-  /// بنفلتر المنتجات المعروضة من غير ما نعمل نداء جديد لـ Firestore —
-  /// لأن كل منتجات الفئة أصلاً موجودة عندنا من loadCategory.
   Future<void> filterBySubcategory(String? subcategory) async {
     final currentState = state;
     if (currentState is! CategoryLoaded) return;
@@ -48,6 +53,7 @@ class CategoryCubit extends Cubit<CategoryState> {
         category: currentState.category,
         products: products,
         selectedSubcategory: subcategory,
+        discountPercent: currentState.discountPercent, // نحافظ على نفس الخصم بعد الفلترة
       ));
     } catch (e) {
       emit(const CategoryError('حدث خطأ في تحميل المنتجات.'));

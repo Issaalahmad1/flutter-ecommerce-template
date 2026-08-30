@@ -31,17 +31,53 @@ class BannersCubit extends Cubit<BannersState> {
   }
 
   Future<void> createBanner(BannerEntity banner) async {
-    await _bannerRepository.createBanner(banner);
+  final conflict = await _findConflictingBanner(banner);
+  if (conflict != null) {
+    emit(BannersError(
+      'يوجد بالفعل بانر نشط ("${conflict.title}") على نفس الفئة. عطّله أو احذفه أولًا.',
+    ));
     await loadBanners();
+    return;
   }
-
+  await _bannerRepository.createBanner(banner);
+  await loadBanners();
+}
   Future<void> updateBanner(BannerEntity banner) async {
-    await _bannerRepository.updateBanner(banner);
+  final conflict = await _findConflictingBanner(banner, excludeId: banner.id);
+  if (conflict != null) {
+    emit(BannersError(
+      'يوجد بالفعل بانر نشط ("${conflict.title}") على نفس الفئة. عطّله أو احذفه أولًا.',
+    ));
     await loadBanners();
+    return;
   }
+  await _bannerRepository.updateBanner(banner);
+  await loadBanners();
+}
 
   Future<void> deleteBanner(String id) async {
     await _bannerRepository.deleteBanner(id);
     await loadBanners();
+  }
+    /// بتدوّر على بانر تاني نشط بيستهدف نفس الفئة — بس لو البانر الجديد
+  /// نفسه هيكون نشط ومرتبط بفئة (مفيش فايدة نمنع بانرات معطّلة أو
+  /// عامة من التعارض مع حاجة).
+  Future<BannerEntity?> _findConflictingBanner(
+    BannerEntity banner, {
+    String? excludeId,
+  }) async {
+    if (!banner.isActive || banner.categoryId == null) return null;
+
+    final allBanners = await _bannerRepository.getBanners(activeOnly: false);
+    final now = DateTime.now();
+
+    for (final existing in allBanners) {
+      if (existing.id == excludeId) continue;
+      if (existing.categoryId != banner.categoryId) continue;
+      if (!existing.isActive) continue;
+      if (existing.expiresAt != null && existing.expiresAt!.isBefore(now)) continue;
+      return existing;
+    }
+    return null;
   }
 }

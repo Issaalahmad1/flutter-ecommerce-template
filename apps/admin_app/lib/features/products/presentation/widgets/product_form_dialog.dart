@@ -1,5 +1,22 @@
+import 'dart:typed_data';
+
 import 'package:decoze_core/core.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+
+/// عنصر صورة واحد في المعرض — إما رابط قديم موجود بالفعل، أو بايتات
+/// صورة جديدة لسه في الذاكرة. الترتيب في القايمة بتاعة الفورم هو
+/// اللي بيحدد "مين الأساسية" (أول عنصر دايمًا).
+class _GalleryImage {
+  final String? existingUrl;
+  final Uint8List? bytes;
+
+  _GalleryImage.existing(this.existingUrl) : bytes = null;
+  _GalleryImage.picked(this.bytes) : existingUrl = null;
+
+  ImageProvider get provider =>
+      bytes != null ? MemoryImage(bytes!) : NetworkImage(existingUrl!) as ImageProvider;
+}
 
 class ProductFormDialog extends StatefulWidget {
   final List<CategoryEntity> categories;
@@ -23,8 +40,9 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
   late final TextEditingController _descriptionController;
   late final TextEditingController _priceController;
   late final TextEditingController _stockController;
-  late final TextEditingController _imageController;
   late String? _selectedCategoryId;
+
+  final List<_GalleryImage> _images = [];
   bool _isSaving = false;
 
   bool get _isEditing => widget.product != null;
@@ -37,7 +55,9 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
     _descriptionController = TextEditingController(text: product?.description ?? '');
     _priceController = TextEditingController(text: product?.price.toString() ?? '');
     _stockController = TextEditingController(text: product?.stock.toString() ?? '');
-    _imageController = TextEditingController(text: product?.thumbnail ?? '');
+    for (final url in product?.images ?? []) {
+      _images.add(_GalleryImage.existing(url));
+    }
     _selectedCategoryId = product?.categoryId ??
         (widget.categories.isNotEmpty ? widget.categories.first.id : null);
   }
@@ -48,21 +68,73 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
     _descriptionController.dispose();
     _priceController.dispose();
     _stockController.dispose();
-    _imageController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickImages() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      withData: true,
+      allowMultiple: true,
+    );
+    if (result == null) return;
+
+    setState(() {
+      for (final file in result.files) {
+        if (file.bytes != null) {
+          _images.add(_GalleryImage.picked(file.bytes!));
+        }
+      }
+    });
+  }
+
+  void _removeImage(int index) {
+    setState(() => _images.removeAt(index));
+  }
+
+  /// بتنقل الصورة المختارة لأول مكان في القايمة، فتبقى هي "الأساسية"
+  /// تلقائيًا (بما إن images[0] هي اللي بتُستخدم كصورة الكارت).
+  void _setAsPrimary(int index) {
+    if (index == 0) return;
+    setState(() {
+      final image = _images.removeAt(index);
+      _images.insert(0, image);
+    });
   }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate() || _selectedCategoryId == null) return;
 
+    if (_images.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('أضف صورة واحدة على الأقل')),
+      );
+      return;
+    }
+
     setState(() => _isSaving = true);
+
+    // نرفع الصور الجديدة بس (اللي لسه بايتات في الذاكرة)، ونسيب
+    // الصور القديمة زي ما هي، مع الحفاظ على نفس ترتيب المعرض.
+    final storageRepository = StorageRepositoryImpl();
+    final finalUrls = <String>[];
+    for (var i = 0; i < _images.length; i++) {
+      final image = _images[i];
+      if (image.existingUrl != null) {
+        finalUrls.add(image.existingUrl!);
+      } else {
+        final path = 'products/${DateTime.now().millisecondsSinceEpoch}_$i.jpg';
+        final url = await storageRepository.uploadImage(bytes: image.bytes!, path: path);
+        finalUrls.add(url);
+      }
+    }
 
     final product = ProductEntity(
       id: widget.product?.id ?? '',
       name: _nameController.text.trim(),
       description: _descriptionController.text.trim(),
       price: double.parse(_priceController.text.trim()),
-      images: [_imageController.text.trim()],
+      images: finalUrls,
       categoryId: _selectedCategoryId!,
       rating: widget.product?.rating ?? 0,
       reviewCount: widget.product?.reviewCount ?? 0,
@@ -126,13 +198,49 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _imageController,
-                  decoration: const InputDecoration(labelText: 'Image URL'),
-                  validator: (v) => (v == null || v.trim().isEmpty) ? 'مطلوب' : null,
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Text('Product images', style: Theme.of(context).textTheme.bodySmall),
+                    const SizedBox(width: 8),
+                    if (_images.isNotEmpty)
+                      Text(
+                        '(اضغط على النجمة لتحديد الصورة الأساسية)',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Theme.of(context).textTheme.bodySmall?.color,
+                        ),
+                      ),
+                  ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    for (var i = 0; i < _images.length; i++)
+                      _ImageThumbnail(
+                        image: _images[i].provider,
+                        isPrimary: i == 0,
+                        onRemove: () => _removeImage(i),
+                        onSetPrimary: () => _setAsPrimary(i),
+                      ),
+                    GestureDetector(
+                      onTap: _pickImages,
+                      child: Container(
+                        width: 70,
+                        height: 70,
+                        decoration: BoxDecoration(
+                          color: Colors.black12,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.white24),
+                        ),
+                        child: const Icon(Icons.add_photo_alternate_outlined),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
                 TextFormField(
                   controller: _descriptionController,
                   decoration: const InputDecoration(labelText: 'Description'),
@@ -159,6 +267,68 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
               : const Text('Save'),
         ),
       ],
+    );
+  }
+}
+
+class _ImageThumbnail extends StatelessWidget {
+  final ImageProvider image;
+  final bool isPrimary;
+  final VoidCallback onRemove;
+  final VoidCallback onSetPrimary;
+
+  const _ImageThumbnail({
+    required this.image,
+    required this.isPrimary,
+    required this.onRemove,
+    required this.onSetPrimary,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 70,
+      height: 70,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            width: 70,
+            height: 70,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              image: DecorationImage(image: image, fit: BoxFit.cover),
+              border: isPrimary ? Border.all(color: Colors.lightGreenAccent, width: 2) : null,
+            ),
+          ),
+          // نجمة تحديد "الأساسية" — تفضل ظاهرة دايمًا، لكن ملونة بس
+          // لو دي فعلاً الصورة الأساسية حاليًا.
+          Positioned(
+            bottom: 2,
+            left: 2,
+            child: GestureDetector(
+              onTap: onSetPrimary,
+              child: Icon(
+                isPrimary ? Icons.star : Icons.star_border,
+                size: 18,
+                color: isPrimary ? Colors.lightGreenAccent : Colors.white70,
+              ),
+            ),
+          ),
+          Positioned(
+            top: -6,
+            right: -6,
+            child: GestureDetector(
+              onTap: onRemove,
+              child: Container(
+                padding: const EdgeInsets.all(2),
+                decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                child: const Icon(Icons.close, size: 14, color: Colors.white),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

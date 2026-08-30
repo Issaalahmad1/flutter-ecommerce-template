@@ -41,3 +41,6 @@ export 'datasources/banner_remote_datasource.dart';
 export 'repositories_impl/banner_repository_impl.dart';
 export 'repositories/storage_repository.dart';
 export 'repositories_impl/storage_repository_impl.dart';
+
+export 'utils/discount_calculator.dart';
+export 'utils/category_icon_library.dart';

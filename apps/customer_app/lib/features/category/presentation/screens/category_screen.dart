@@ -37,19 +37,24 @@ class _CategoryScreenBody extends StatelessWidget {
         child: BlocBuilder<CategoryCubit, CategoryState>(
           builder: (context, state) {
             return switch (state) {
-              CategoryInitial() || CategoryLoading() =>
-                const Center(child: CircularProgressIndicator()),
+              CategoryInitial() || CategoryLoading() => const Center(
+                child: CircularProgressIndicator(),
+              ),
               CategoryError(:final message) => Center(child: Text(message)),
               CategoryLoaded(
                 :final category,
                 :final products,
                 :final selectedSubcategory,
+                :final discountPercent,
               ) =>
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       child: Row(
                         children: [
                           IconButton(
@@ -95,15 +100,20 @@ class _CategoryScreenBody extends StatelessWidget {
                     const SizedBox(height: 16),
                     Expanded(
                       child: products.isEmpty
-                          ? const Center(child: Text('لا توجد منتجات في هذا القسم.'))
+                          ? const Center(
+                              child: Text('لا توجد منتجات في هذا القسم.'),
+                            )
                           : SingleChildScrollView(
                               child: ProductGrid(
                                 products: products,
+                                  discountPercent: discountPercent,
+
                                 onProductTap: (product) {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
-                                      builder: (_) =>
-                                          ProductDetailScreen(productId: product.id),
+                                      builder: (_) => ProductDetailScreen(
+                                        productId: product.id,
+                                      ),
                                     ),
                                   );
                                 },

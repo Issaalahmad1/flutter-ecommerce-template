@@ -3,10 +3,10 @@ import 'package:customer_app/features/category/presentation/screens/category_scr
 import 'package:customer_app/features/favourite/presentation/screens/favourite_screen.dart';
 import 'package:customer_app/features/product/presentation/screens/product_detail_screen.dart';
 import 'package:customer_app/features/product/presentation/widgets/product_grid.dart';
+import 'package:customer_app/shared/category_image.dart';
 import 'package:decoze_core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../cubit/home_cubit.dart';
 import '../cubit/home_state.dart';
 
@@ -88,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     if (banners.isNotEmpty) ...[
                       SizedBox(
-                        height: 160,
+                        height: 140,
                         child: PageView.builder(
                           controller: _bannerController,
                           onPageChanged: (index) =>
@@ -112,6 +112,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 discount: banner.discountLabel,
                                 title: banner.title,
                                 subtitle: banner.subtitle,
+                                imageUrl: banner.imageUrl,
+
                                 expiresAt: banner.expiresAt,
                               ),
                             );
@@ -175,12 +177,14 @@ class _PromoBanner extends StatelessWidget {
   final String discount;
   final String title;
   final String subtitle;
+  final String? imageUrl;
   final DateTime? expiresAt;
 
   const _PromoBanner({
     required this.discount,
     required this.title,
     required this.subtitle,
+    this.imageUrl,
     this.expiresAt,
   });
 
@@ -193,61 +197,120 @@ class _PromoBanner extends StatelessWidget {
         : expiresAt!.difference(DateTime.now()).inDays + 1;
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+      margin: EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         color: brand.surface,
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Row(
+      clipBehavior: Clip.antiAlias,
+      child: Column(
         children: [
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              spacing: 32,
               children: [
-                Text(
-                  '$discount off',
-                  style: TextStyle(
-                    color: brand.accent,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(title, style: const TextStyle(fontSize: 15)),
-                const SizedBox(height: 8),
-                Text(
-                  subtitle,
-                  style: TextStyle(fontSize: 11, color: brand.textSecondary),
-                ),
-                if (daysLeft != null && daysLeft > 0) ...[
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      daysLeft == 1
-                          ? 'ينتهي غدًا'
-                          : 'ينتهي خلال $daysLeft أيام',
-                      style: const TextStyle(
-                        color: Colors.red,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      RichText(
+                        text: TextSpan(
+                          style: DefaultTextStyle.of(context).style,
+                          children: [
+                            TextSpan(
+                              text: "$discount%",
+                              style: TextStyle(
+                                color: brand.accent,
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const TextSpan(
+                              text: ' off',
+                              style: TextStyle(fontSize: 20),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 4),
+                      SizedBox(
+                        width: 109,
+                        child: Text(
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          title,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ),
+                      if (daysLeft != null && daysLeft > 0) ...[
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            daysLeft == 1
+                                ? 'ينتهي غدًا'
+                                : 'ينتهي خلال $daysLeft أيام',
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
-                ],
+                ),
+
+                Expanded(
+                  flex: 3,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      imageUrl != null
+                          ? CachedNetworkImage(
+                              height: 83,
+                              width: 198,
+                              imageUrl: imageUrl!,
+                              fit: BoxFit.contain,
+                              errorWidget: (context, url, error) => Icon(
+                                Icons.weekend_outlined,
+                                size: 60,
+                                color: brand.textSecondary,
+                              ),
+                            )
+                          : Center(
+                              child: Icon(
+                                Icons.weekend_outlined,
+                                size: 60,
+                                color: brand.textSecondary,
+                              ),
+                            ),
+                      Text(
+                        subtitle,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: brand.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
-          Icon(Icons.weekend_outlined, size: 70, color: brand.textSecondary),
         ],
       ),
     );
@@ -260,6 +323,8 @@ class _CategoryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      const brand = BrandConfig.decoze; // تأكد من وجود السطر ده
+
     return SizedBox(
       height: 90,
       child: ListView.separated(
@@ -281,8 +346,12 @@ class _CategoryRow extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 30,
-                  backgroundImage: CachedNetworkImageProvider(
-                    category.imageUrl,
+                  backgroundColor: brand.surface,
+                  child: ClipOval(
+                    child: CategoryImage(
+                      imageUrl: category.imageUrl, 
+                      fit: BoxFit.contain,
+                      size: 300),
                   ),
                 ),
                 const SizedBox(height: 6),

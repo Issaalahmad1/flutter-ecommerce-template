@@ -7,13 +7,24 @@ import 'package:equatable/equatable.dart';
 class CartLineItem extends Equatable {
   final ProductEntity product;
   final int quantity;
+  final int? discountPercent;
 
-  const CartLineItem({required this.product, required this.quantity});
+  const CartLineItem({
+    required this.product,
+    required this.quantity,
+    this.discountPercent,
+  });
 
-  double get lineTotal => product.price * quantity;
+  /// السعر الفعلي للوحدة بعد تطبيق الخصم (لو موجود وساري).
+  double get unitPrice => DiscountCalculator.applyDiscount(product.price, discountPercent);
+
+  double get lineTotal => unitPrice * quantity;
+
+  /// قيمة الخصم الإجمالية على السطر ده (للعرض في الفاتورة).
+  double get discountAmount => (product.price - unitPrice) * quantity;
 
   @override
-  List<Object?> get props => [product, quantity];
+  List<Object?> get props => [product, quantity, discountPercent];
 }
 
 sealed class CartState extends Equatable {
@@ -40,6 +51,7 @@ class CartLoaded extends CartState {
   const CartLoaded({required this.items});
 
   double get subtotal => items.fold(0, (sum, item) => sum + item.lineTotal);
+  double get totalDiscount => items.fold(0, (sum, item) => sum + item.discountAmount);
   double get tax => items.isEmpty ? 0 : taxAmount;
   double get delivery => items.isEmpty ? 0 : deliveryFee;
   double get total => subtotal + tax + delivery;
@@ -47,7 +59,6 @@ class CartLoaded extends CartState {
   @override
   List<Object?> get props => [items];
 }
-
 class CartError extends CartState {
   final String message;
   const CartError(this.message);

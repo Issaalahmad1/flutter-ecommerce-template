@@ -10,8 +10,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class ProductCard extends StatelessWidget {
   final ProductEntity product;
   final VoidCallback? onTap;
+  final int? discountPercent;
 
-  const ProductCard({super.key, required this.product, this.onTap});
+  const ProductCard({
+    super.key,
+    required this.product,
+    this.onTap,
+    this.discountPercent,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -76,30 +82,56 @@ class ProductCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        '${brand.currencySymbol} ${product.price.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          color: brand.accent,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Expanded(
+                        child: discountPercent != null && discountPercent! > 0
+                            ? Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    '${brand.currencySymbol} ${DiscountCalculator.applyDiscount(product.price, discountPercent).toStringAsFixed(2)}',
+                                    style: TextStyle(
+                                      color: brand.accent,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Flexible(
+                                    child: Text(
+                                      '${brand.currencySymbol} ${product.price.toStringAsFixed(2)}',
+                                      style: TextStyle(
+                                        color: brand.textSecondary,
+                                        fontSize: 10,
+                                        decoration: TextDecoration.lineThrough,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : Text(
+                                '${brand.currencySymbol} ${product.price.toStringAsFixed(2)}',
+                                style: TextStyle(
+                                  color: brand.accent,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                       ),
-                      if (product.rating > 0)
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.star,
-                              size: 14,
-                              color: Colors.amber,
-                            ),
-                            const SizedBox(width: 2),
-                            Text(
-                              product.rating.toStringAsFixed(1),
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                          ],
-                        ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.star, size: 14, color: Colors.amber),
+                          const SizedBox(width: 2),
+                          Text(
+                            '${product.rating}',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ],
+                      ),
                     ],
-                  ),
+                  ),  
                 ],
               ),
             ),

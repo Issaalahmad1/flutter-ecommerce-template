@@ -8,11 +8,13 @@ import 'product_card.dart';
 class ProductGrid extends StatelessWidget {
   final List<ProductEntity> products;
   final ValueChanged<ProductEntity>? onProductTap;
+  final int? discountPercent;
 
   const ProductGrid({
     super.key,
     required this.products,
     this.onProductTap,
+    this.discountPercent,
   });
 
   @override
@@ -33,6 +35,7 @@ class ProductGrid extends StatelessWidget {
         return ProductCard(
           product: product,
           onTap: onProductTap == null ? null : () => onProductTap!(product),
+          discountPercent: discountPercent,
         );
       },
     );

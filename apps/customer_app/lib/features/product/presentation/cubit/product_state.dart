@@ -19,11 +19,16 @@ class ProductLoading extends ProductState {
 class ProductLoaded extends ProductState {
   final ProductEntity product;
   final List<ReviewEntity> reviews;
+  final int? discountPercent;
 
-  const ProductLoaded({required this.product, required this.reviews});
+  const ProductLoaded({
+    required this.product,
+    required this.reviews,
+    this.discountPercent,
+  });
 
   @override
-  List<Object?> get props => [product, reviews];
+  List<Object?> get props => [product, reviews, discountPercent];
 }
 
 class ProductError extends ProductState {

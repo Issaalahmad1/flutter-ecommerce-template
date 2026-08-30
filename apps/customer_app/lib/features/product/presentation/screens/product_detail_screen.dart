@@ -42,169 +42,218 @@ class _ProductDetailBody extends StatelessWidget {
                 child: CircularProgressIndicator(),
               ),
               ProductError(:final message) => Center(child: Text(message)),
-              ProductLoaded(:final product, :final reviews) => Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    child: Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.arrow_back),
-                          onPressed: () => Navigator.of(context).pop(),
-                        ),
-                        const Spacer(),
-                        BlocBuilder<FavouriteCubit, FavouriteState>(
-                          builder: (context, favState) {
-                            final isFav =
-                                favState is FavouriteLoaded &&
-                                favState.isFavorite(product.id);
-                            return IconButton(
-                              icon: Icon(
-                                isFav ? Icons.favorite : Icons.favorite_border,
-                                color: isFav ? Colors.red : null,
-                              ),
-                              onPressed: () => context
-                                  .read<FavouriteCubit>()
-                                  .toggleFavorite(product.id),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+              ProductLoaded(
+                :final product,
+                :final reviews,
+                :final discountPercent,
+              ) =>
+                Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      child: Row(
                         children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
-                            child: AspectRatio(
-                              aspectRatio: 1,
-                              child: CachedNetworkImage(
-                                imageUrl: product.thumbnail,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
+                          IconButton(
+                            icon: const Icon(Icons.arrow_back),
+                            onPressed: () => Navigator.of(context).pop(),
                           ),
-                          const SizedBox(height: 20),
-                          Text(
-                            product.name,
-                            style: Theme.of(context).textTheme.headlineSmall,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            product.description,
-                            style: TextStyle(
-                              color: brand.textSecondary,
-                              height: 1.5,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                '${brand.currencySymbol} ${product.price.toStringAsFixed(2)}',
-                                style: TextStyle(
-                                  color: brand.accent,
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
+                          const Spacer(),
+                          BlocBuilder<FavouriteCubit, FavouriteState>(
+                            builder: (context, favState) {
+                              final isFav =
+                                  favState is FavouriteLoaded &&
+                                  favState.isFavorite(product.id);
+                              return IconButton(
+                                icon: Icon(
+                                  isFav
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                  color: isFav ? Colors.red : null,
                                 ),
-                              ),
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.star,
-                                    color: Colors.amber,
-                                    size: 18,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    '${product.rating} (${product.reviewCount})',
-                                  ),
-                                ],
-                              ),
-                            ],
+                                onPressed: () => context
+                                    .read<FavouriteCubit>()
+                                    .toggleFavorite(product.id),
+                              );
+                            },
                           ),
-                          const Divider(height: 32),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'User Reviews',
-                                style: Theme.of(context).textTheme.titleMedium,
-                              ),
-                              Text(
-                                '${reviews.length}+ Reviews',
-                                style: TextStyle(color: brand.textSecondary),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          if (reviews.isEmpty)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              child: Text(
-                                'لا توجد تقييمات بعد.',
-                                style: TextStyle(color: brand.textSecondary),
-                              ),
-                            )
-                          else
-                            ...reviews
-                                .take(3)
-                                .map(
-                                  (review) => Padding(
-                                    padding: const EdgeInsets.only(bottom: 16),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Text(
-                                              review.userName,
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Row(
-                                              children: List.generate(
-                                                5,
-                                                (i) => Icon(
-                                                  i < review.rating.round()
-                                                      ? Icons.star
-                                                      : Icons.star_border,
-                                                  size: 14,
-                                                  color: Colors.amber,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          review.comment,
-                                          style: TextStyle(
-                                            color: brand.textSecondary,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                          const SizedBox(height: 90),
                         ],
                       ),
                     ),
-                  ),
-                ],
-              ),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _ProductGallery(images: product.images),
+                            const SizedBox(height: 20),
+                            Text(
+                              product.name,
+                              style: Theme.of(context).textTheme.headlineSmall,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              product.description,
+                              style: TextStyle(
+                                color: brand.textSecondary,
+                                height: 1.5,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                discountPercent != null && discountPercent > 0
+                                    ? Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          Text(
+                                            '${brand.currencySymbol} ${DiscountCalculator.applyDiscount(product.price, discountPercent).toStringAsFixed(2)}',
+                                            style: TextStyle(
+                                              color: brand.accent,
+                                              fontSize: 22,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            '${brand.currencySymbol} ${product.price.toStringAsFixed(2)}',
+                                            style: TextStyle(
+                                              color: brand.textSecondary,
+                                              fontSize: 14,
+                                              decoration:
+                                                  TextDecoration.lineThrough,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 6,
+                                              vertical: 2,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.red,
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
+                                            ),
+                                            child: Text(
+                                              '-$discountPercent%',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    : Text(
+                                        '${brand.currencySymbol} ${product.price.toStringAsFixed(2)}',
+                                        style: TextStyle(
+                                          color: brand.accent,
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.star,
+                                      color: Colors.amber,
+                                      size: 18,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '${product.rating} (${product.reviewCount})',
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            const Divider(height: 32),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'User Reviews',
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.titleMedium,
+                                ),
+                                Text(
+                                  '${reviews.length}+ Reviews',
+                                  style: TextStyle(color: brand.textSecondary),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            if (reviews.isEmpty)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
+                                child: Text(
+                                  'لا توجد تقييمات بعد.',
+                                  style: TextStyle(color: brand.textSecondary),
+                                ),
+                              )
+                            else
+                              ...reviews
+                                  .take(3)
+                                  .map(
+                                    (review) => Padding(
+                                      padding: const EdgeInsets.only(
+                                        bottom: 16,
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Text(
+                                                review.userName,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Row(
+                                                children: List.generate(
+                                                  5,
+                                                  (i) => Icon(
+                                                    i < review.rating.round()
+                                                        ? Icons.star
+                                                        : Icons.star_border,
+                                                    size: 14,
+                                                    color: Colors.amber,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            review.comment,
+                                            style: TextStyle(
+                                              color: brand.textSecondary,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                            const SizedBox(height: 90),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
             };
           },
         ),
@@ -232,6 +281,113 @@ class _ProductDetailBody extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+
+
+class _ProductGallery extends StatefulWidget {
+  final List<String> images;
+
+  const _ProductGallery({required this.images});
+
+  @override
+  State<_ProductGallery> createState() => _ProductGalleryState();
+}
+
+class _ProductGalleryState extends State<_ProductGallery> {
+  final _pageController = PageController();
+  int _activeIndex = 0;
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _goToImage(int index) {
+    setState(() => _activeIndex = index);
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const brand = BrandConfig.decoze;
+
+    if (widget.images.isEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: Container(
+            color: brand.surface,
+            child: Icon(Icons.image_outlined, size: 60, color: brand.textSecondary),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: AspectRatio(
+            aspectRatio: 1,
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: widget.images.length,
+              onPageChanged: (index) => setState(() => _activeIndex = index),
+              itemBuilder: (context, index) {
+                return CachedNetworkImage(
+                  imageUrl: widget.images[index],
+                  fit: BoxFit.cover,
+                );
+              },
+            ),
+          ),
+        ),
+        if (widget.images.length > 1) ...[
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 64,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: widget.images.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 8),
+              itemBuilder: (context, index) {
+                final isActive = index == _activeIndex;
+                return GestureDetector(
+                  onTap: () => _goToImage(index),
+                  child: Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: isActive ? brand.accent : Colors.transparent,
+                        width: 2,
+                      ),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: CachedNetworkImage(
+                        imageUrl: widget.images[index],
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

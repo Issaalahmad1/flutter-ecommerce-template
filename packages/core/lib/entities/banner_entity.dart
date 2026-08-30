@@ -56,7 +56,9 @@ class BannerEntity extends Equatable {
       'createdAt': createdAt.toIso8601String(),
     };
   }
-
+  /// نسخة رقمية من discountLabel — نافعة لحساب الخصم الفعلي.
+/// لو discountLabel مش رقم صحيح لأي سبب (بيانات قديمة مثلاً)، بترجع null.
+int? get discountPercent => int.tryParse(discountLabel);
   @override
   List<Object?> get props => [
         id,

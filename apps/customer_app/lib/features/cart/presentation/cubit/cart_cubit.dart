@@ -8,6 +8,7 @@ import 'cart_state.dart';
 class CartCubit extends Cubit<CartState> {
   final CartRepository _cartRepository;
   final ProductRepository _productRepository;
+  final BannerRepository _bannerRepository;
 
   String? _uid;
   StreamSubscription<List<CartItemEntity>>? _subscription;
@@ -15,12 +16,12 @@ class CartCubit extends Cubit<CartState> {
   CartCubit({
     required CartRepository cartRepository,
     required ProductRepository productRepository,
+    BannerRepository? bannerRepository,
   })  : _cartRepository = cartRepository,
         _productRepository = productRepository,
+        _bannerRepository = bannerRepository ?? BannerRepositoryImpl(),
         super(const CartInitial());
 
-  /// بيتنفذ لما تتغيّر حالة المستخدم (تسجيل دخول/خروج) — بيبدأ أو
-  /// بيوقف مراقبة السلة تبعًا لذلك. راجع BlocListener في main.dart.
   void attachUser(String? uid) {
     _subscription?.cancel();
     _uid = uid;
@@ -41,10 +42,19 @@ class CartCubit extends Cubit<CartState> {
   }
 
   Future<List<CartLineItem>> _buildLineItems(List<CartItemEntity> items) async {
+    // بنجيب البانرات مرة واحدة بس لكل السلة (مش لكل منتج على حدة)،
+    // عشان نقلل عدد الطلبات لـ Firestore.
+    final banners = await _bannerRepository.getBanners();
+
     final futures = items.map((item) async {
       try {
         final product = await _productRepository.getProductById(item.productId);
-        return CartLineItem(product: product, quantity: item.quantity);
+        final discount = DiscountCalculator.findActiveDiscount(banners, product.categoryId);
+        return CartLineItem(
+          product: product,
+          quantity: item.quantity,
+          discountPercent: discount?.discountPercent,
+        );
       } catch (_) {
         return null;
       }

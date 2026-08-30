@@ -20,17 +20,18 @@ class CategoryLoaded extends CategoryState {
   final CategoryEntity category;
   final List<ProductEntity> products;
   final String? selectedSubcategory;
+  final int? discountPercent;
 
   const CategoryLoaded({
     required this.category,
     required this.products,
     this.selectedSubcategory,
+    this.discountPercent,
   });
 
   @override
-  List<Object?> get props => [category, products, selectedSubcategory];
+  List<Object?> get props => [category, products, selectedSubcategory, discountPercent];
 }
-
 class CategoryError extends CategoryState {
   final String message;
   const CategoryError(this.message);
