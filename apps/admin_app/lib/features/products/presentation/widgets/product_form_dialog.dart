@@ -1,8 +1,8 @@
-import 'dart:typed_data';
 
 import 'package:decoze_core/core.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// عنصر صورة واحد في المعرض — إما رابط قديم موجود بالفعل، أو بايتات
 /// صورة جديدة لسه في الذاكرة. الترتيب في القايمة بتاعة الفورم هو
@@ -14,8 +14,9 @@ class _GalleryImage {
   _GalleryImage.existing(this.existingUrl) : bytes = null;
   _GalleryImage.picked(this.bytes) : existingUrl = null;
 
-  ImageProvider get provider =>
-      bytes != null ? MemoryImage(bytes!) : NetworkImage(existingUrl!) as ImageProvider;
+  ImageProvider get provider => bytes != null
+      ? MemoryImage(bytes!)
+      : NetworkImage(existingUrl!) as ImageProvider;
 }
 
 class ProductFormDialog extends StatefulWidget {
@@ -52,13 +53,20 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
     super.initState();
     final product = widget.product;
     _nameController = TextEditingController(text: product?.name ?? '');
-    _descriptionController = TextEditingController(text: product?.description ?? '');
-    _priceController = TextEditingController(text: product?.price.toString() ?? '');
-    _stockController = TextEditingController(text: product?.stock.toString() ?? '');
+    _descriptionController = TextEditingController(
+      text: product?.description ?? '',
+    );
+    _priceController = TextEditingController(
+      text: product?.price.toString() ?? '',
+    );
+    _stockController = TextEditingController(
+      text: product?.stock.toString() ?? '',
+    );
     for (final url in product?.images ?? []) {
       _images.add(_GalleryImage.existing(url));
     }
-    _selectedCategoryId = product?.categoryId ??
+    _selectedCategoryId =
+        product?.categoryId ??
         (widget.categories.isNotEmpty ? widget.categories.first.id : null);
   }
 
@@ -103,12 +111,14 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate() || _selectedCategoryId == null) return;
+    if (!_formKey.currentState!.validate() || _selectedCategoryId == null) {
+      return;
+    }
 
     if (_images.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('أضف صورة واحدة على الأقل')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('أضف صورة واحدة على الأقل')));
       return;
     }
 
@@ -124,7 +134,10 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
         finalUrls.add(image.existingUrl!);
       } else {
         final path = 'products/${DateTime.now().millisecondsSinceEpoch}_$i.jpg';
-        final url = await storageRepository.uploadImage(bytes: image.bytes!, path: path);
+        final url = await storageRepository.uploadImage(
+          bytes: image.bytes!,
+          path: path,
+        );
         finalUrls.add(url);
       }
     }
@@ -164,16 +177,21 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                 TextFormField(
                   controller: _nameController,
                   decoration: const InputDecoration(labelText: 'Product name'),
-                  validator: (v) => (v == null || v.trim().isEmpty) ? 'مطلوب' : null,
+                  validator: (v) =>
+                      (v == null || v.trim().isEmpty) ? 'مطلوب' : null,
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
                   initialValue: _selectedCategoryId,
                   decoration: const InputDecoration(labelText: 'Category'),
                   items: widget.categories
-                      .map((c) => DropdownMenuItem(value: c.id, child: Text(c.name)))
+                      .map(
+                        (c) =>
+                            DropdownMenuItem(value: c.id, child: Text(c.name)),
+                      )
                       .toList(),
-                  onChanged: (value) => setState(() => _selectedCategoryId = value),
+                  onChanged: (value) =>
+                      setState(() => _selectedCategoryId = value),
                 ),
                 const SizedBox(height: 12),
                 Row(
@@ -182,9 +200,20 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                       child: TextFormField(
                         controller: _priceController,
                         decoration: const InputDecoration(labelText: 'Price'),
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        validator: (v) =>
-                            (double.tryParse(v ?? '') == null) ? 'رقم غير صحيح' : null,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d*\.?\d*$'),
+                          ),
+                        ],
+                        validator: (v) {
+                          final value = double.tryParse(v ?? '');
+                          if (value == null) return 'أدخل رقم صحيح';
+                          if (value <= 0) return 'السعر لازم يكون أكبر من صفر';
+                          return null;
+                        },
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -193,7 +222,9 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                         controller: _stockController,
                         decoration: const InputDecoration(labelText: 'Stock'),
                         keyboardType: TextInputType.number,
-                        validator: (v) => (int.tryParse(v ?? '') == null) ? 'رقم غير صحيح' : null,
+                        validator: (v) => (int.tryParse(v ?? '') == null)
+                            ? 'رقم غير صحيح'
+                            : null,
                       ),
                     ),
                   ],
@@ -201,7 +232,10 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    Text('Product images', style: Theme.of(context).textTheme.bodySmall),
+                    Text(
+                      'Product images',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
                     const SizedBox(width: 8),
                     if (_images.isNotEmpty)
                       Text(
@@ -256,6 +290,8 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Cancel'),
         ),
+            const SizedBox(height: 8),
+
         ElevatedButton(
           onPressed: _isSaving ? null : _submit,
           child: _isSaving
@@ -298,7 +334,9 @@ class _ImageThumbnail extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
               image: DecorationImage(image: image, fit: BoxFit.cover),
-              border: isPrimary ? Border.all(color: Colors.lightGreenAccent, width: 2) : null,
+              border: isPrimary
+                  ? Border.all(color: Colors.lightGreenAccent, width: 2)
+                  : null,
             ),
           ),
           // نجمة تحديد "الأساسية" — تفضل ظاهرة دايمًا، لكن ملونة بس
@@ -322,7 +360,10 @@ class _ImageThumbnail extends StatelessWidget {
               onTap: onRemove,
               child: Container(
                 padding: const EdgeInsets.all(2),
-                decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
                 child: const Icon(Icons.close, size: 14, color: Colors.white),
               ),
             ),

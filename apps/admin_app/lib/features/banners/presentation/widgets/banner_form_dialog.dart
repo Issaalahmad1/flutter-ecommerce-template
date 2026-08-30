@@ -1,8 +1,7 @@
-import 'dart:typed_data';
-
 import 'package:decoze_core/core.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class BannerFormDialog extends StatefulWidget {
   final List<CategoryEntity> categories;
@@ -41,7 +40,9 @@ class _BannerFormDialogState extends State<BannerFormDialog> {
     final banner = widget.banner;
     _titleController = TextEditingController(text: banner?.title ?? '');
     _subtitleController = TextEditingController(text: banner?.subtitle ?? '');
-    _discountController = TextEditingController(text: banner?.discountLabel ?? '');
+    _discountController = TextEditingController(
+      text: banner?.discountLabel ?? '',
+    );
     _selectedCategoryId = banner?.categoryId;
     _isActive = banner?.isActive ?? true;
     _expiresAt = banner?.expiresAt;
@@ -106,137 +107,185 @@ class _BannerFormDialogState extends State<BannerFormDialog> {
     return AlertDialog(
       title: Text(_isEditing ? 'Edit banner' : 'Add banner'),
       content: SizedBox(
-  width: 420,
-  height: 500,
-  child: SingleChildScrollView(
-    child: Form(
-      key: _formKey,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-              // منطقة معاينة الصورة + زرار الاختيار
-              GestureDetector(
-                onTap: _pickImage,
-                child: Container(
-                  height: 140,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.black12,
-                    borderRadius: BorderRadius.circular(10),
-                    image: _pickedImageBytes != null
-                        ? DecorationImage(
-                            image: MemoryImage(_pickedImageBytes!),
-                            fit: BoxFit.cover,
-                          )
-                        : (_existingImageUrl != null
-                            ? DecorationImage(
-                                image: NetworkImage(_existingImageUrl!),
-                                fit: BoxFit.cover,
-                              )
-                            : null),
-                  ),
-                  child: (_pickedImageBytes == null && _existingImageUrl == null)
-                      ? const Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.add_photo_alternate_outlined, size: 32),
-                              SizedBox(height: 6),
-                              Text('اختر صورة للبانر'),
-                            ],
-                          ),
-                        )
-                      : Align(
-                          alignment: Alignment.bottomRight,
-                          child: Container(
-                            margin: const EdgeInsets.all(8),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.black54,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: const Text(
-                              'تغيير الصورة',
-                              style: TextStyle(color: Colors.white, fontSize: 12),
-                            ),
-                          ),
-                        ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(labelText: 'Title'),
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'مطلوب' : null,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _subtitleController,
-                decoration: const InputDecoration(labelText: 'Subtitle'),
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'مطلوب' : null,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _discountController,
-                decoration: const InputDecoration(
-                  labelText: 'Discount label',
-                  helperText: 'مثال: 25%',
-                ),
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'مطلوب' : null,
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<String?>(
-                initialValue: _selectedCategoryId,
-                decoration: const InputDecoration(labelText: 'Linked category (optional)'),
-                items: [
-                  const DropdownMenuItem(value: null, child: Text('None')),
-                  ...widget.categories.map(
-                    (c) => DropdownMenuItem(value: c.id, child: Text(c.name)),
-                  ),
-                ],
-                onChanged: (value) => setState(() => _selectedCategoryId = value),
-              ),
-              const SizedBox(height: 8),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Active'),
-                value: _isActive,
-                onChanged: (v) => setState(() => _isActive = v),
-              ),
-              const SizedBox(height: 8),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(
-                  _expiresAt == null
-                      ? 'No expiry date'
-                      : 'Expires: ${_expiresAt!.day}/${_expiresAt!.month}/${_expiresAt!.year}',
-                ),
-                trailing: Wrap(
-                  spacing: 4,
-                  children: [
-                    TextButton(
-                      onPressed: () async {
-                        final picked = await showDatePicker(
-                          context: context,
-                          initialDate:
-                              _expiresAt ?? DateTime.now().add(const Duration(days: 7)),
-                          firstDate: DateTime.now(),
-                          lastDate: DateTime.now().add(const Duration(days: 365)),
-                        );
-                        if (picked != null) setState(() => _expiresAt = picked);
-                      },
-                      child: const Text('Set date'),
+        width: 420,
+        height: 500,
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // منطقة معاينة الصورة + زرار الاختيار
+                GestureDetector(
+                  onTap: _pickImage,
+                  child: Container(
+                    height: 140,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.black12,
+                      borderRadius: BorderRadius.circular(10),
+                      image: _pickedImageBytes != null
+                          ? DecorationImage(
+                              image: MemoryImage(_pickedImageBytes!),
+                              fit: BoxFit.cover,
+                            )
+                          : (_existingImageUrl != null
+                                ? DecorationImage(
+                                    image: NetworkImage(_existingImageUrl!),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null),
                     ),
-                    if (_expiresAt != null)
-                      TextButton(
-                        onPressed: () => setState(() => _expiresAt = null),
-                        child: const Text('Clear'),
-                      ),
-                  ],
+                    child:
+                        (_pickedImageBytes == null && _existingImageUrl == null)
+                        ? const Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.add_photo_alternate_outlined,
+                                  size: 32,
+                                ),
+                                SizedBox(height: 6),
+                                Text('اختر صورة للبانر'),
+                              ],
+                            ),
+                          )
+                        : Align(
+                            alignment: Alignment.bottomRight,
+                            child: Container(
+                              margin: const EdgeInsets.all(8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.black54,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: const Text(
+                                'تغيير الصورة',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                  ),
                 ),
-              ),
-            ],              
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _titleController,
+                  decoration: const InputDecoration(labelText: 'Title'),
+                  validator: (v) =>
+                      (v == null || v.trim().isEmpty) ? 'مطلوب' : null,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _subtitleController,
+                  decoration: const InputDecoration(labelText: 'Subtitle'),
+                  validator: (v) =>
+                      (v == null || v.trim().isEmpty) ? 'مطلوب' : null,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _discountController,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(3),
+                  ],
+                  decoration: const InputDecoration(
+                    labelText: 'Discount percentage',
+                    suffixText: '%',
+                    helperText: 'رقم من 1 إلى 100',
+                  ),
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) return 'مطلوب';
+                    final number = int.tryParse(v.trim());
+                    if (number == null || number < 1 || number > 100) {
+                      return 'أدخل رقم من 1 إلى 100';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String?>(
+                  initialValue: _selectedCategoryId,
+                  decoration: const InputDecoration(
+                    labelText: 'Linked category (optional)',
+                  ),
+                  items: [
+                    const DropdownMenuItem(value: null, child: Text('None')),
+                    ...widget.categories.map(
+                      (c) => DropdownMenuItem(value: c.id, child: Text(c.name)),
+                    ),
+                  ],
+                  onChanged: (value) =>
+                      setState(() => _selectedCategoryId = value),
+                ),
+                const SizedBox(height: 8),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Active'),
+                  value: _isActive,
+                  onChanged: (v) => setState(() => _isActive = v),
+                ),
+                const SizedBox(height: 8),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(
+                    _expiresAt == null
+                        ? 'No expiry date'
+                        : 'Expires: ${_expiresAt!.day}/${_expiresAt!.month}/${_expiresAt!.year}',
+                  ),
+                  trailing: Wrap(
+                    spacing: 4,
+                    children: [
+                      TextButton(
+                        onPressed: () async {
+                          final pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate:
+                                _expiresAt ??
+                                DateTime.now().add(const Duration(days: 7)),
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime.now().add(
+                              const Duration(days: 365),
+                            ),
+                          );
+                          if (pickedDate == null || !context.mounted) return;
+
+                          final pickedTime = await showTimePicker(
+                            context: context,
+                            initialTime: _expiresAt != null
+                                ? TimeOfDay.fromDateTime(_expiresAt!)
+                                : const TimeOfDay(hour: 23, minute: 59),
+                          );
+                          if (pickedTime == null) return;
+
+                          setState(() {
+                            _expiresAt = DateTime(
+                              pickedDate.year,
+                              pickedDate.month,
+                              pickedDate.day,
+                              pickedTime.hour,
+                              pickedTime.minute,
+                            );
+                          });
+                        },
+                        child: const Text('Set date'),
+                      ),
+                      if (_expiresAt != null)
+                        TextButton(
+                          onPressed: () => setState(() => _expiresAt = null),
+                          child: const Text('Clear'),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -246,6 +295,8 @@ class _BannerFormDialogState extends State<BannerFormDialog> {
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Cancel'),
         ),
+            const SizedBox(height: 8),
+
         ElevatedButton(
           onPressed: _isSaving ? null : _submit,
           child: _isSaving
