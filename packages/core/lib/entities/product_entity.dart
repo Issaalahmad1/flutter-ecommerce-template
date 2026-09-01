@@ -17,6 +17,18 @@ class ProductEntity extends Equatable {
   final ProductStatus status;
   final DateTime createdAt;
 
+  /// لون المنتج (Hex زي '#8B5CF6') — اختياري، مش كل منتج لازم يكون
+  /// ليه لون محدد (زي سجادة متعددة الألوان مثلاً).
+  final String? color;
+
+  /// ترجمات الوصف المخزّنة (Cache) — بتتحسب مرة واحدة بس أول ما حد
+  /// يدوس "ترجمة"، وبعدين بتتحفظ هنا عشان أي مستخدم تاني يستفيد منها
+  /// من غير ما نطلب من الذكاء الاصطناعي يترجم نفس النص تاني.
+  final String? descriptionAr;
+  final String? descriptionEn;
+  final String? nameAr;
+  final String? nameEn;
+
   const ProductEntity({
     required this.id,
     required this.name,
@@ -31,6 +43,11 @@ class ProductEntity extends Equatable {
     this.isFeatured = false,
     this.status = ProductStatus.active,
     required this.createdAt,
+    this.color,
+    this.descriptionAr,
+    this.descriptionEn,
+    this.nameAr,
+    this.nameEn,
   });
 
   String get thumbnail => images.isNotEmpty ? images.first : '';
@@ -49,6 +66,12 @@ class ProductEntity extends Equatable {
     bool? isFeatured,
     ProductStatus? status,
     DateTime? createdAt,
+    String? color,
+    bool clearColor = false,
+    String? descriptionAr,
+    String? descriptionEn,
+    String? nameAr,
+    String? nameEn,
   }) {
     return ProductEntity(
       id: id ?? this.id,
@@ -64,6 +87,11 @@ class ProductEntity extends Equatable {
       isFeatured: isFeatured ?? this.isFeatured,
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
+      color: clearColor ? null : (color ?? this.color),
+      descriptionAr: descriptionAr ?? this.descriptionAr,
+      descriptionEn: descriptionEn ?? this.descriptionEn,
+      nameAr: nameAr ?? this.nameAr,
+      nameEn: nameEn ?? this.nameEn,
     );
   }
 
@@ -85,6 +113,11 @@ class ProductEntity extends Equatable {
         orElse: () => ProductStatus.active,
       ),
       createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
+      color: json['color'] as String?,
+      descriptionAr: json['descriptionAr'] as String?,
+      descriptionEn: json['descriptionEn'] as String?,
+      nameAr: json['nameAr'] as String?,
+      nameEn: json['nameEn'] as String?,
     );
   }
 
@@ -102,6 +135,11 @@ class ProductEntity extends Equatable {
       'isFeatured': isFeatured,
       'status': status.name,
       'createdAt': createdAt.toIso8601String(),
+      'color': color,
+      'descriptionAr': descriptionAr,
+      'descriptionEn': descriptionEn,
+      'nameAr': nameAr,
+      'nameEn': nameEn,
     };
   }
 
@@ -120,5 +158,10 @@ class ProductEntity extends Equatable {
         isFeatured,
         status,
         createdAt,
+        color,
+        descriptionAr,
+        descriptionEn,
+        nameAr,
+        nameEn,
       ];
 }

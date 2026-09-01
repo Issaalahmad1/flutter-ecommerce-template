@@ -11,6 +11,7 @@ class PaymentSuccessScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const brand = BrandConfig.decoze;
+    final strings = context.strings;
 
     return Scaffold(
       body: SafeArea(
@@ -25,10 +26,10 @@ class PaymentSuccessScreen extends StatelessWidget {
                 child: Icon(Icons.check, color: brand.onAccent, size: 44),
               ),
               const SizedBox(height: 24),
-              Text('Successful!', style: Theme.of(context).textTheme.headlineSmall),
+              Text(strings.paymentSuccessful, style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: 8),
               Text(
-                'Payment successful for your purchase.',
+                strings.paymentSuccessDescription,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: brand.textSecondary),
               ),
@@ -41,7 +42,7 @@ class PaymentSuccessScreen extends StatelessWidget {
                     ),
                   );
                 },
-                child: const Text('Track Order'),
+                child: Text(strings.trackOrder),
               ),
               const SizedBox(height: 24),
             ],

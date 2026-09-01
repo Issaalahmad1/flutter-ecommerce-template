@@ -12,18 +12,19 @@ class CartScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = context.strings;
     return Scaffold(
-      appBar: AppBar(title: const Text('My Cart')),
+      appBar: AppBar(title: Text(strings.cartTitle)),
       body: BlocBuilder<CartCubit, CartState>(
         builder: (context, state) {
           return switch (state) {
             CartInitial() ||
             CartLoading() => const Center(child: CircularProgressIndicator()),
             CartError(:final message) => Center(child: Text(message)),
-            CartLoaded(:final items) when items.isEmpty => const Center(
+            CartLoaded(:final items) when items.isEmpty => Center(
               child: Text(
-                'Your cart is empty',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                strings.emptyCart,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
             CartLoaded(:final items) => Column(
@@ -134,6 +135,7 @@ class _CartSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const brand = BrandConfig.decoze;
+    final strings = context.strings;
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -143,17 +145,17 @@ class _CartSummary extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _SummaryRow(label: 'Subtotal', value: state.subtotal),
+          _SummaryRow(label: strings.subtotal, value: state.subtotal),
           if (state.totalDiscount > 0)
             _SummaryRow(
-              label: 'Discount',
+              label: strings.discount,
               value: -state.totalDiscount,
               isDiscount: true,
             ),
-          _SummaryRow(label: 'Tax and Fees', value: state.tax),
-          _SummaryRow(label: 'Delivery', value: state.delivery),
+          _SummaryRow(label: strings.taxAndFees, value: state.tax),
+          _SummaryRow(label: strings.delivery, value: state.delivery),
           const Divider(height: 24),
-          _SummaryRow(label: 'Total', value: state.total, isBold: true),
+          _SummaryRow(label: strings.total, value: state.total, isBold: true),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
@@ -161,7 +163,7 @@ class _CartSummary extends StatelessWidget {
                 context,
               ).push(MaterialPageRoute(builder: (_) => const CheckoutScreen()));
             },
-            child: const Text('Check Out'),
+            child: Text(strings.checkOut),
           ),
         ],
       ),

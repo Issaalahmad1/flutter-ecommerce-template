@@ -27,9 +27,10 @@ class _TrackOrderBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const brand = BrandConfig.decoze;
+    final strings = context.strings;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Track Order')),
+      appBar: AppBar(title: Text(strings.trackOrder)),
       body: BlocBuilder<OrderCubit, OrderState>(
         builder: (context, state) {
           return switch (state) {
@@ -60,12 +61,12 @@ class _TrackOrderBody extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Estimated Delivery',
+                        strings.estimatedDelivery,
                         style: TextStyle(color: brand.textSecondary),
                       ),
-                      const Text(
-                        '48 Hours',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                      Text(
+                        strings.hoursLabel(48),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -110,7 +111,7 @@ class _TrackOrderBody extends StatelessWidget {
                         }
                       });
                     },
-                    child: const Text('Back To Home'),
+                    child: Text(strings.backToHome),
                   ),
                   const SizedBox(height: 16),
                 ],

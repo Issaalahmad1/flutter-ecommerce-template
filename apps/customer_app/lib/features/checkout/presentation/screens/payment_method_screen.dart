@@ -89,9 +89,10 @@ class _PaymentMethodBodyState extends State<_PaymentMethodBody> {
   @override
   Widget build(BuildContext context) {
     const brand = BrandConfig.decoze;
+    final strings = context.strings;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Payment Method')),
+      appBar: AppBar(title: Text(strings.paymentMethodTitle)),
       body: BlocConsumer<OrderCubit, OrderState>(
         listener: (context, state) {
           if (state is OrderReady) {
@@ -118,9 +119,9 @@ class _PaymentMethodBodyState extends State<_PaymentMethodBody> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Select the payment method you want to use.',
-                  style: TextStyle(fontSize: 13),
+                Text(
+                  strings.selectPaymentMethod,
+                  style: const TextStyle(fontSize: 13),
                 ),
                 const SizedBox(height: 12),
                 RadioListTile<String>(
@@ -134,14 +135,14 @@ class _PaymentMethodBodyState extends State<_PaymentMethodBody> {
                   value: 'paypal',
                   groupValue: _selectedMethod,
                   onChanged: (v) => setState(() => _selectedMethod = v!),
-                  title: const Text('PayPal'),
+                  title: Text(strings.paypal),
                   activeColor: brand.accent,
                 ),
                 RadioListTile<String>(
                   value: 'cash',
                   groupValue: _selectedMethod,
                   onChanged: (v) => setState(() => _selectedMethod = v!),
-                  title: const Text('Cash Money'),
+                  title: Text(strings.cashMoney),
                   activeColor: brand.accent,
                 ),
                 const Spacer(),
@@ -153,7 +154,7 @@ class _PaymentMethodBodyState extends State<_PaymentMethodBody> {
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Payment'),
+                      : Text(strings.payment),
                 ),
               ],
             ),

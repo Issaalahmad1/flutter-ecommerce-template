@@ -100,8 +100,8 @@ class _CategoryScreenBody extends StatelessWidget {
                     const SizedBox(height: 16),
                     Expanded(
                       child: products.isEmpty
-                          ? const Center(
-                              child: Text('لا توجد منتجات في هذا القسم.'),
+                          ? Center(
+                              child: Text(context.strings.noProductsInCategory),
                             )
                           : SingleChildScrollView(
                               child: ProductGrid(

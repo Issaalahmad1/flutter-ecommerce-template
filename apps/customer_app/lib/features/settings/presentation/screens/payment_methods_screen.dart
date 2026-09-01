@@ -7,9 +7,10 @@ class PaymentMethodsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const brand = BrandConfig.decoze;
+    final strings = context.strings;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Payments Methods')),
+      appBar: AppBar(title: Text(strings.paymentMethodsTitle)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -17,15 +18,15 @@ class PaymentMethodsScreen extends StatelessWidget {
             leading: Icon(Icons.credit_card),
             title: Text('•••• •••• •••• 4679'),
           ),
-          const ListTile(leading: Icon(Icons.payment), title: Text('PayPal')),
-          const ListTile(leading: Icon(Icons.money), title: Text('Cash Money')),
+          ListTile(leading: const Icon(Icons.payment), title: Text(strings.paypal)),
+          ListTile(leading: const Icon(Icons.money), title: Text(strings.cashMoney)),
           const Divider(height: 32),
           ListTile(
             leading: Icon(Icons.add_circle_outline, color: brand.accent),
-            title: Text('Add New Method', style: TextStyle(color: brand.accent)),
+            title: Text(strings.addNewMethod, style: TextStyle(color: brand.accent)),
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('هتتفعّل مع بوابة دفع حقيقية لاحقًا.')),
+                SnackBar(content: Text(strings.paymentComingSoon)),
               );
             },
           ),

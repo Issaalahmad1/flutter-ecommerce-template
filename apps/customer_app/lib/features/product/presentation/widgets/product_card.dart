@@ -51,7 +51,7 @@ class ProductCard extends StatelessWidget {
                       return GestureDetector(
                         onTap: () => context
                             .read<FavouriteCubit>()
-                            .toggleFavorite(product.id),
+                            .toggleFavorite(product.id, product: product),
                         child: CircleAvatar(
                           radius: 14,
                           backgroundColor: Colors.white,

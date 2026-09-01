@@ -19,6 +19,7 @@ export 'repositories/auth_repository.dart';
 export 'repositories/cart_repository.dart';
 export 'repositories/order_repository.dart';
 export 'repositories/favourite_repository.dart';
+export 'repositories/address_repository.dart';
 // Data sources (للاستخدام في الاختبارات بشكل أساسي)
 export 'datasources/auth_remote_datasource.dart';
 export 'datasources/category_remote_datasource.dart';
@@ -26,6 +27,7 @@ export 'datasources/product_remote_datasource.dart';
 export 'datasources/cart_remote_datasource.dart';
 export 'datasources/order_remote_datasource.dart';
 export 'datasources/favourite_remote_datasource.dart';
+export 'datasources/address_remote_datasource.dart';
 
 // Repository implementations — التنفيذ الفعلي المشترك بين customer_app وadmin_app
 export 'repositories_impl/auth_repository_impl.dart';
@@ -34,6 +36,7 @@ export 'repositories_impl/product_repository_impl.dart';
 export 'repositories_impl/cart_repository_impl.dart';
 export 'repositories_impl/order_repository_impl.dart';
 export 'repositories_impl/favourite_repository_impl.dart';
+export 'repositories_impl/address_repository_impl.dart';
 
 export 'entities/banner_entity.dart';
 export 'repositories/banner_repository.dart';
@@ -44,3 +47,12 @@ export 'repositories_impl/storage_repository_impl.dart';
 
 export 'utils/discount_calculator.dart';
 export 'utils/category_icon_library.dart';
+export 'utils/product_color_palette.dart';
+
+export 'repositories/search_repository.dart';
+export 'repositories_impl/search_repository_impl.dart';
+export 'repositories_impl/product_translation_service.dart';
+
+// Localization
+export 'localization/app_strings.dart';
+export 'localization/app_strings_delegate.dart';

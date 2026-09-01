@@ -2,19 +2,36 @@ import 'package:decoze_core/core.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'app_router.dart';
+import 'features/address/presentation/cubit/address_cubit.dart';
 import 'features/auth/presentation/cubit/auth_cubit.dart';
 import 'features/auth/presentation/cubit/auth_state.dart';
 import 'features/cart/presentation/cubit/cart_cubit.dart';
+import 'features/settings/presentation/cubit/locale_cubit.dart';
 import 'firebase_options.dart';
 import 'features/favourite/presentation/cubit/favourite_cubit.dart';
 
+import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
+  // في وضع Debug (جهاز المطوّر) بنستخدم Debug provider، وده محتاج تسجيل
+  // يدوي لكل جهاز مطوّر في Firebase Console. في وضع Release (نسخة
+  // المستخدمين الحقيقيين من المتجر) بنستخدم Play Integrity/App Attest،
+  // وده بيتحقق تلقائيًا من كل جهاز من غير أي تسجيل يدوي لكل مستخدم.
+  //
+  // من غير await عمدًا: activate() ممكن يعمل طلب شبكة (خصوصًا لو Play
+  // Services على الجهاز مش مستقر)، ومش عايزين نعلّق بداية تشغيل
+  // التطبيق كله لحد ما الطلب ده يخلص — التوكنات بتتجاب lazily وقت
+  // الحاجة الفعلية (زي طلبات Firebase AI).
+  FirebaseAppCheck.instance.activate(
+    providerAndroid: kDebugMode ? const AndroidDebugProvider() : const AndroidPlayIntegrityProvider(),
+    providerApple: kDebugMode ? const AppleDebugProvider() : const AppleAppAttestProvider(),
+  );
   runApp(const DecozeApp());
 }
 
@@ -42,6 +59,10 @@ class DecozeApp extends StatelessWidget {
             productRepository: ProductRepositoryImpl(),
           ),
         ),
+        BlocProvider(
+          create: (_) => AddressCubit(addressRepository: AddressRepositoryImpl()),
+        ),
+        BlocProvider(create: (_) => LocaleCubit()),
       ],
       child: const _AppWithRouter(),
     );
@@ -62,19 +83,34 @@ class _AppWithRouter extends StatelessWidget {
       listener: (context, state) {
         final cartCubit = context.read<CartCubit>();
         final favouriteCubit = context.read<FavouriteCubit>();
+        final addressCubit = context.read<AddressCubit>();
         if (state is AuthAuthenticated) {
           cartCubit.attachUser(state.user.uid);
           favouriteCubit.attachUser(state.user.uid);
+          addressCubit.attachUser(state.user.uid);
         } else if (state is AuthUnauthenticated) {
           cartCubit.attachUser(null);
           favouriteCubit.attachUser(null);
+          addressCubit.attachUser(null);
         }
       },
-      child: MaterialApp.router(
-        title: DecozeApp.brand.appName,
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.build(DecozeApp.brand),
-        routerConfig: router,
+      child: BlocBuilder<LocaleCubit, Locale>(
+        builder: (context, locale) {
+          return MaterialApp.router(
+            title: DecozeApp.brand.appName,
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.build(DecozeApp.brand),
+            routerConfig: router,
+            locale: locale,
+            supportedLocales: AppStringsDelegate.supportedLocales,
+            localizationsDelegates: const [
+              AppStringsDelegate(),
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+          );
+        },
       ),
     );
   }

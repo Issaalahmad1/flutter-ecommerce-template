@@ -15,32 +15,33 @@ class _SecurityScreenState extends State<SecurityScreen> {
   @override
   Widget build(BuildContext context) {
     const brand = BrandConfig.decoze;
+    final strings = context.strings;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Security')),
+      appBar: AppBar(title: Text(strings.securityTitle)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           SwitchListTile(
-            title: const Text('Remember me'),
+            title: Text(strings.rememberMe),
             value: _rememberMe,
             activeThumbColor: brand.accent,
             onChanged: (v) => setState(() => _rememberMe = v),
           ),
           SwitchListTile(
-            title: const Text('Biometric ID'),
+            title: Text(strings.biometricId),
             value: _biometric,
             activeThumbColor: brand.accent,
             onChanged: (v) => setState(() => _biometric = v),
           ),
-          const ListTile(
-            title: Text('Google Authenticator'),
-            trailing: Icon(Icons.chevron_right),
+          ListTile(
+            title: Text(strings.googleAuthenticator),
+            trailing: const Icon(Icons.chevron_right),
           ),
           const SizedBox(height: 16),
-          OutlinedButton(onPressed: () {}, child: const Text('Change PIN')),
+          OutlinedButton(onPressed: () {}, child: Text(strings.changePin)),
           const SizedBox(height: 8),
-          OutlinedButton(onPressed: () {}, child: const Text('Change Password')),
+          OutlinedButton(onPressed: () {}, child: Text(strings.changePassword)),
         ],
       ),
     );

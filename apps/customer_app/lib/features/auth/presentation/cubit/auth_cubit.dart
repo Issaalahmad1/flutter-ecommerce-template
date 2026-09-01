@@ -70,6 +70,37 @@ class AuthCubit extends Cubit<AuthState> {
       emit(AuthError(e is StateError ? e.message : 'حدث خطأ غير متوقع.'));
     }
   }
+  /// بيحدّث بيانات البروفايل (الاسم، الصورة، تاريخ الميلاد...) لحساب
+  /// المستخدم الحالي. الإيميل مش من ضمن الحقول القابلة للتعديل هنا —
+  /// تغيير الإيميل في Firebase Auth عملية حساسة محتاجة إعادة تحقق
+  /// منفصلة، مش جزء من الشاشة دي.
+  Future<void> updateProfile({
+    required String firstName,
+    required String lastName,
+    String? phone,
+    DateTime? dob,
+    String? gender,
+    String? photoUrl,
+  }) async {
+    try {
+      await _authRepository.completeProfile(
+        firstName: firstName,
+        lastName: lastName,
+        phone: phone,
+        dob: dob,
+        gender: gender,
+        photoUrl: photoUrl,
+      );
+      final updatedUser = _authRepository.currentUser;
+      if (updatedUser != null) {
+        emit(AuthAuthenticated(updatedUser));
+      }
+    } catch (e) {
+      debugPrint('== Update profile error: $e ==');
+      rethrow;
+    }
+  }
+
   Future<void> signOut() async {
     await _authRepository.signOut();
     emit(const AuthUnauthenticated());

@@ -38,9 +38,10 @@ class _OrdersScreenBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const brand = BrandConfig.decoze;
+    final strings = context.strings;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Orders')),
+      appBar: AppBar(title: Text(strings.ordersTitle)),
       body: BlocBuilder<OrdersListCubit, OrdersListState>(
         builder: (context, state) {
           return switch (state) {
@@ -48,7 +49,7 @@ class _OrdersScreenBody extends StatelessWidget {
               const Center(child: CircularProgressIndicator()),
             OrdersListError(:final message) => Center(child: Text(message)),
             OrdersListLoaded(:final orders) when orders.isEmpty =>
-              const Center(child: Text('لا توجد طلبات سابقة.')),
+              Center(child: Text(strings.noOrders)),
             OrdersListLoaded(:final orders) => ListView.separated(
                 padding: const EdgeInsets.all(16),
                 itemCount: orders.length,

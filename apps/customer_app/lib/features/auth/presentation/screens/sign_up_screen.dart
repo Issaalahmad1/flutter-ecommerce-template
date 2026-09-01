@@ -40,6 +40,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     const brand = BrandConfig.decoze;
+    final strings = context.strings;
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -68,7 +69,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       const SizedBox(height: 24),
                       Center(
                         child: Text(
-                          'Create your \n${brand.appName} account',
+                          strings.createAccountTitle(brand.appName),
                           style: Theme.of(context).textTheme.headlineLarge,
                         ),
                       ),
@@ -76,16 +77,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       TextFormField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
-                        decoration: const InputDecoration(
-                          hintText: 'Email',
-                          prefixIcon: Icon(Icons.mail_outline),
+                        decoration: InputDecoration(
+                          hintText: strings.emailHint,
+                          prefixIcon: const Icon(Icons.mail_outline),
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'من فضلك أدخل البريد الإلكتروني';
+                            return strings.emailRequired;
                           }
                           if (!value.contains('@')) {
-                            return 'صيغة البريد الإلكتروني غير صحيحة';
+                            return strings.emailInvalid;
                           }
                           return null;
                         },
@@ -94,7 +95,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         controller: _passwordController,
                         obscureText: _obscurePassword,
                         decoration: InputDecoration(
-                          hintText: 'Password',
+                          hintText: strings.passwordHint,
                           prefixIcon: const Icon(Icons.lock_outline),
                           suffixIcon: IconButton(
                             icon: Icon(
@@ -109,7 +110,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ),
                         validator: (value) {
                           if (value == null || value.length < 6) {
-                            return 'كلمة المرور لازم تكون 6 أحرف على الأقل';
+                            return strings.passwordTooShort;
                           }
                           return null;
                         },
@@ -117,13 +118,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       TextFormField(
                         controller: _confirmController,
                         obscureText: _obscurePassword,
-                        decoration: const InputDecoration(
-                          hintText: 'Confirm password',
-                          prefixIcon: Icon(Icons.lock_outline),
+                        decoration: InputDecoration(
+                          hintText: strings.confirmPasswordHint,
+                          prefixIcon: const Icon(Icons.lock_outline),
                         ),
                         validator: (value) {
                           if (value != _passwordController.text) {
-                            return 'كلمة المرور غير متطابقة';
+                            return strings.passwordsDontMatch;
                           }
                           return null;
                         },
@@ -138,16 +139,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   strokeWidth: 2,
                                 ),
                               )
-                            : const Text('Sign up'),
+                            : Text(strings.signUp),
                       ),
                       Row(
-                        children: const [
-                          Expanded(child: Divider()),
+                        children: [
+                          const Expanded(child: Divider()),
                           Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 12),
-                            child: Text('or continue with'),
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: Text(strings.orContinueWith),
                           ),
-                          Expanded(child: Divider()),
+                          const Expanded(child: Divider()),
                         ],
                       ),
                       Row(
@@ -197,7 +198,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           onPressed: () {
                             context.go('/sign-in');
                           },
-                          child: const Text('Already have an account? Sign in'),
+                          child: Text(strings.alreadyHaveAccount),
                         ),
                       ),
                       const SizedBox(height: 24),

@@ -3,6 +3,8 @@ import 'package:customer_app/features/category/presentation/screens/category_scr
 import 'package:customer_app/features/favourite/presentation/screens/favourite_screen.dart';
 import 'package:customer_app/features/product/presentation/screens/product_detail_screen.dart';
 import 'package:customer_app/features/product/presentation/widgets/product_grid.dart';
+import 'package:customer_app/features/product/presentation/widgets/product_row.dart';
+import 'package:customer_app/features/search/presentation/screens/search_screen.dart';
 import 'package:customer_app/shared/category_image.dart';
 import 'package:decoze_core/core.dart';
 import 'package:flutter/material.dart';
@@ -39,24 +41,32 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(width: 16),
-            Image.asset(brand.logoAssetPath, height: 30),
-          ],
-        ),
-        title: Text(
-          brand.appName,
-          style: Theme.of(
-            context,
-          ).textTheme.titleLarge?.copyWith(color: brand.accent),
+        // الشعار + اسم البراند بيتحركوا كوحدة واحدة (يمين في RTL، شمال
+        // في LTR)، لكن ترتيبهم الداخلي (شعار الأول، بعدين النص) ثابت
+        // زي الإنجليزي دايمًا — مش بينعكس مع تغيير اللغة.
+        title: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(brand.logoAssetPath, height: 30),
+              const SizedBox(width: 8),
+              Text(
+                brand.appName,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(color: brand.accent),
+              ),
+            ],
+          ),
         ),
         actions: [
           IconButton(
             icon: const Icon(Icons.search_outlined),
             onPressed: () {
-              // شاشة البحث هنبنيها في خطوة قادمة منفصلة
+              Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const SearchScreen()));
             },
           ),
           IconButton(
@@ -79,6 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
             HomeLoaded(
               :final categories,
               :final featuredProducts,
+              :final allProducts,
               :final banners,
             ) =>
               RefreshIndicator(
@@ -147,13 +158,33 @@ class _HomeScreenState extends State<HomeScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
-                        'Top selling',
+                        context.strings.topSelling,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    ProductRow(
+                      products: featuredProducts,
+                      onProductTap: (product) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                ProductDetailScreen(productId: product.id),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        context.strings.discover,
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                     ),
                     const SizedBox(height: 12),
                     ProductGrid(
-                      products: featuredProducts,
+                      products: allProducts,
                       onProductTap: (product) {
                         Navigator.of(context).push(
                           MaterialPageRoute(
@@ -191,6 +222,8 @@ class _PromoBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const brand = BrandConfig.decoze;
+    final strings = context.strings;
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
 
     final daysLeft = expiresAt == null
         ? null
@@ -218,22 +251,47 @@ class _PromoBanner extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       RichText(
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         text: TextSpan(
                           style: DefaultTextStyle.of(context).style,
-                          children: [
-                            TextSpan(
-                              text: "$discount%",
-                              style: TextStyle(
-                                color: brand.accent,
-                                fontSize: 32,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const TextSpan(
-                              text: ' off',
-                              style: TextStyle(fontSize: 20),
-                            ),
-                          ],
+                          // بالعربي "خصم" بييجي قبل الرقم، وبالإنجليزي
+                          // "off" بييجي بعده — بنبني الترتيب يدويًا
+                          // حسب اللغة بدل ما نعتمد على انعكاس تلقائي.
+                          // خط "خصم" أصغر بكتير من الرقم عشان يفضل جنب
+                          // النسبة في نفس السطر من غير ما يكبّر الكارت.
+                          children: isArabic
+                              ? [
+                                  TextSpan(
+                                    text: '${strings.offLabel} ',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: brand.textSecondary,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: "$discount%",
+                                    style: TextStyle(
+                                      color: brand.accent,
+                                      fontSize: 32,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ]
+                              : [
+                                  TextSpan(
+                                    text: "$discount%",
+                                    style: TextStyle(
+                                      color: brand.accent,
+                                      fontSize: 32,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: ' ${strings.offLabel}',
+                                    style: const TextStyle(fontSize: 20),
+                                  ),
+                                ],
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -259,8 +317,8 @@ class _PromoBanner extends StatelessWidget {
                           ),
                           child: Text(
                             daysLeft == 1
-                                ? 'ينتهي غدًا'
-                                : 'ينتهي خلال $daysLeft أيام',
+                                ? strings.endsTomorrow
+                                : strings.endsInDays(daysLeft),
                             style: const TextStyle(
                               color: Colors.red,
                               fontSize: 10,
@@ -323,7 +381,7 @@ class _CategoryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-      const brand = BrandConfig.decoze; // تأكد من وجود السطر ده
+    const brand = BrandConfig.decoze; // تأكد من وجود السطر ده
 
     return SizedBox(
       height: 90,
@@ -349,9 +407,10 @@ class _CategoryRow extends StatelessWidget {
                   backgroundColor: brand.surface,
                   child: ClipOval(
                     child: CategoryImage(
-                      imageUrl: category.imageUrl, 
+                      imageUrl: category.imageUrl,
                       fit: BoxFit.contain,
-                      size: 300),
+                      size: 300,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 6),

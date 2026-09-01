@@ -53,18 +53,36 @@ class FavouriteCubit extends Cubit<FavouriteState> {
 
   /// دالة واحدة بتتبع الحالة الحالية وتقرر تضيف ولا تشيل — الشاشة
   /// مش محتاجة تعرف الفرق، بس تنده "toggle" على أي منتج.
-  Future<void> toggleFavorite(String productId) async {
+  ///
+  /// بتحدّث الحالة محليًا فورًا (عشان القلب يتغيّر لون في نفس اللحظة
+  /// من غير أي انتظار)، وتبعت الكتابة الفعلية لـ Firestore في الخلفية.
+  /// [product] اختياري — لو موجود (زي لما بننده من كارت منتج فيه
+  /// النسخة كاملة أصلاً) بيتضاف فورًا لقايمة المفضلة المعروضة.
+  Future<void> toggleFavorite(String productId, {ProductEntity? product}) async {
     final uid = _uid;
     final currentState = state;
     if (uid == null) return;
 
-    final isFav = currentState is FavouriteLoaded &&
-        currentState.isFavorite(productId);
+    final isFav = currentState is FavouriteLoaded && currentState.isFavorite(productId);
+
+    if (currentState is FavouriteLoaded) {
+      if (isFav) {
+        emit(FavouriteLoaded(
+          favoriteIds: currentState.favoriteIds.where((id) => id != productId).toList(),
+          products: currentState.products.where((p) => p.id != productId).toList(),
+        ));
+      } else {
+        emit(FavouriteLoaded(
+          favoriteIds: [...currentState.favoriteIds, productId],
+          products: product != null ? [...currentState.products, product] : currentState.products,
+        ));
+      }
+    }
 
     if (isFav) {
-      await _favouriteRepository.removeFavorite(uid, productId);
+      unawaited(_favouriteRepository.removeFavorite(uid, productId));
     } else {
-      await _favouriteRepository.addFavorite(uid, productId);
+      unawaited(_favouriteRepository.addFavorite(uid, productId));
     }
   }
 

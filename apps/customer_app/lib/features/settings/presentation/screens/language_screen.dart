@@ -1,37 +1,37 @@
 import 'package:decoze_core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class LanguageScreen extends StatefulWidget {
+import '../cubit/locale_cubit.dart';
+
+class LanguageScreen extends StatelessWidget {
   const LanguageScreen({super.key});
-
-  @override
-  State<LanguageScreen> createState() => _LanguageScreenState();
-}
-
-class _LanguageScreenState extends State<LanguageScreen> {
-  String _selected = 'English (US)';
-
-  static const _languages = [
-    'English (US)', 'English (UK)', 'Mandarin', 'Hindi', 'Spanish',
-    'French', 'Arabic', 'Bengali', 'Russian', 'Indonesia',
-  ];
 
   @override
   Widget build(BuildContext context) {
     const brand = BrandConfig.decoze;
+    final strings = context.strings;
+    final currentLocale = context.watch<LocaleCubit>().state;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Language')),
+      appBar: AppBar(title: Text(strings.languageTitle)),
       body: ListView(
-        children: _languages
-            .map((lang) => RadioListTile<String>(
-                  title: Text(lang),
-                  value: lang,
-                  groupValue: _selected,
-                  activeColor: brand.accent,
-                  onChanged: (v) => setState(() => _selected = v!),
-                ))
-            .toList(),
+        children: [
+          RadioListTile<String>(
+            title: Text(strings.languageArabic),
+            value: 'ar',
+            groupValue: currentLocale.languageCode,
+            activeColor: brand.accent,
+            onChanged: (_) => context.read<LocaleCubit>().setLocale(const Locale('ar')),
+          ),
+          RadioListTile<String>(
+            title: Text(strings.languageEnglish),
+            value: 'en',
+            groupValue: currentLocale.languageCode,
+            activeColor: brand.accent,
+            onChanged: (_) => context.read<LocaleCubit>().setLocale(const Locale('en')),
+          ),
+        ],
       ),
     );
   }

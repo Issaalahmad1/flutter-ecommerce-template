@@ -92,19 +92,9 @@ class AuthRemoteDataSource {
     if (user == null) {
       throw StateError('فشل تسجيل الدخول بـ X.');
     }
-
-    // X مش بيرجّع بريد إلكتروني إلا لو التطبيق فعّل "Request email"
-    // (محتاج Privacy Policy رسمي). لحد ما نضيفها، بنستخدم اسم العرض
-    // (Display Name) بتاع حساب X كبديل مؤقت في بروفايلنا.
-    if ((user.email == null || user.email!.isEmpty) &&
-        user.displayName != null) {
-      await createUserDocument(uid: user.uid, email: '');
-      await updateUserDocument(user.uid, {
-        'firstName': user.displayName,
-        'lastName': '',
-      });
-    }
-
+    // اسم العرض والصورة بييجوا من user.displayName / user.photoURL —
+    // Firebase بيملاهم تلقائي من بيانات حساب X. الإنشاء الفعلي لمستند
+    // المستخدم (أول مرة بس) بيحصل في AuthRepositoryImpl.
     return user;
   }
   Future<void> signOut() => firebaseAuth.signOut();
@@ -119,11 +109,15 @@ class AuthRemoteDataSource {
   Future<void> createUserDocument({
     required String uid,
     required String email,
+    String firstName = '',
+    String lastName = '',
+    String? photoUrl,
   }) {
     return firestore.collection('users').doc(uid).set({
-      'firstName': '',
-      'lastName': '',
+      'firstName': firstName,
+      'lastName': lastName,
       'email': email,
+      'photoUrl': photoUrl,
       'role': 'customer',
       'language': 'en',
       'createdAt': DateTime.now().toIso8601String(),

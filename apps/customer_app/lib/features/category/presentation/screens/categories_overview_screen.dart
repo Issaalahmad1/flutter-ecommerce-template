@@ -27,7 +27,7 @@ class _CategoriesOverviewBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Categories')),
+      appBar: AppBar(title: Text(context.strings.categoriesTitle)),
       body: BlocBuilder<CategoriesOverviewCubit, CategoriesOverviewState>(
         builder: (context, state) {
           return switch (state) {

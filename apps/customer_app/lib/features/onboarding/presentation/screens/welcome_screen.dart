@@ -9,6 +9,7 @@ class WelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const brand = BrandConfig.decoze;
+    final strings = context.strings;
 
     return Scaffold(
       body: SafeArea(
@@ -25,7 +26,7 @@ class WelcomeScreen extends StatelessWidget {
                   Image.asset(brand.logoAssetPath, width: 120, height: 120),
                   const SizedBox(height: 0),
                   Text(
-                    'Welcome to',
+                    strings.welcomeTo,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
@@ -40,7 +41,7 @@ class WelcomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 72),
               Text(
-                'Style your spaces & shop for all \nyour decor needs',
+                strings.welcomeTagline,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: brand.textSecondary, fontSize: 15),
               ),
@@ -51,7 +52,7 @@ class WelcomeScreen extends StatelessWidget {
                     MaterialPageRoute(builder: (_) => const OnboardingScreen()),
                   );
                 },
-                child: const Text('Get Started'),
+                child: Text(strings.getStarted),
               ),
               const SizedBox(height: 24),
             ],

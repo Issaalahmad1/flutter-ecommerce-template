@@ -42,11 +42,20 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
   late final TextEditingController _priceController;
   late final TextEditingController _stockController;
   late String? _selectedCategoryId;
+  late String? _selectedColor;
+  late String? _selectedSubcategory;
 
   final List<_GalleryImage> _images = [];
   bool _isSaving = false;
 
   bool get _isEditing => widget.product != null;
+
+  List<String> get _currentSubcategories {
+    for (final category in widget.categories) {
+      if (category.id == _selectedCategoryId) return category.subcategories;
+    }
+    return const [];
+  }
 
   @override
   void initState() {
@@ -68,6 +77,8 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
     _selectedCategoryId =
         product?.categoryId ??
         (widget.categories.isNotEmpty ? widget.categories.first.id : null);
+    _selectedColor = product?.color;
+    _selectedSubcategory = product?.subcategoryId;
   }
 
   @override
@@ -149,12 +160,14 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
       price: double.parse(_priceController.text.trim()),
       images: finalUrls,
       categoryId: _selectedCategoryId!,
+      subcategoryId: _selectedSubcategory,
       rating: widget.product?.rating ?? 0,
       reviewCount: widget.product?.reviewCount ?? 0,
       stock: int.parse(_stockController.text.trim()),
       isFeatured: widget.product?.isFeatured ?? false,
       status: ProductStatus.active,
       createdAt: widget.product?.createdAt ?? DateTime.now(),
+      color: _selectedColor,
     );
 
     await widget.onSubmit(product);
@@ -190,9 +203,31 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                             DropdownMenuItem(value: c.id, child: Text(c.name)),
                       )
                       .toList(),
-                  onChanged: (value) =>
-                      setState(() => _selectedCategoryId = value),
+                  onChanged: (value) => setState(() {
+                    _selectedCategoryId = value;
+                    // لو الفئة اتغيّرت، الفئة الفرعية القديمة ممكن متبقاش
+                    // موجودة في قايمة الفئة الجديدة.
+                    if (!_currentSubcategories.contains(_selectedSubcategory)) {
+                      _selectedSubcategory = null;
+                    }
+                  }),
                 ),
+                if (_currentSubcategories.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String?>(
+                    initialValue: _selectedSubcategory,
+                    decoration: const InputDecoration(
+                      labelText: 'Subcategory (optional)',
+                    ),
+                    items: [
+                      const DropdownMenuItem(value: null, child: Text('—')),
+                      for (final sub in _currentSubcategories)
+                        DropdownMenuItem(value: sub, child: Text(sub)),
+                    ],
+                    onChanged: (value) =>
+                        setState(() => _selectedSubcategory = value),
+                  ),
+                ],
                 const SizedBox(height: 12),
                 Row(
                   children: [
@@ -227,6 +262,30 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                             : null,
                       ),
                     ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Color (optional)',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    _ColorSwatch(
+                      color: null,
+                      isSelected: _selectedColor == null,
+                      onTap: () => setState(() => _selectedColor = null),
+                    ),
+                    for (final entry in ProductColorPalette.colors.entries)
+                      _ColorSwatch(
+                        color: ProductColorPalette.toColor(entry.value),
+                        label: entry.key,
+                        isSelected: _selectedColor == entry.value,
+                        onTap: () => setState(() => _selectedColor = entry.value),
+                      ),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -369,6 +428,47 @@ class _ImageThumbnail extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// دائرة لون واحدة قابلة للاختيار — لو [color] كان null، دي خيار
+/// "بدون لون" (زي X)، مفيدة للمنتجات اللي مالهاش لون محدد.
+class _ColorSwatch extends StatelessWidget {
+  final Color? color;
+  final String? label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _ColorSwatch({
+    required this.color,
+    required this.isSelected,
+    required this.onTap,
+    this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Tooltip(
+        message: label ?? 'بدون لون',
+        child: Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: color ?? Colors.transparent,
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: isSelected ? Colors.lightGreenAccent : Colors.white24,
+              width: isSelected ? 2 : 1,
+            ),
+          ),
+          child: color == null
+              ? const Icon(Icons.close, size: 16, color: Colors.white54)
+              : null,
+        ),
       ),
     );
   }

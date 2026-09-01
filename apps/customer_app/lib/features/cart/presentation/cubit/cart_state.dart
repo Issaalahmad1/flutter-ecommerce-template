@@ -23,6 +23,14 @@ class CartLineItem extends Equatable {
   /// قيمة الخصم الإجمالية على السطر ده (للعرض في الفاتورة).
   double get discountAmount => (product.price - unitPrice) * quantity;
 
+  CartLineItem copyWith({ProductEntity? product, int? quantity, int? discountPercent}) {
+    return CartLineItem(
+      product: product ?? this.product,
+      quantity: quantity ?? this.quantity,
+      discountPercent: discountPercent ?? this.discountPercent,
+    );
+  }
+
   @override
   List<Object?> get props => [product, quantity, discountPercent];
 }

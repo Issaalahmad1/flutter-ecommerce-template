@@ -21,5 +21,6 @@ abstract class AuthRepository {
     String? phone,
     DateTime? dob,
     String? gender,
+    String? photoUrl,
   });
 }

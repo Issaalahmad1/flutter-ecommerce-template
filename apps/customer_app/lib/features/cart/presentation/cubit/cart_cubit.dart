@@ -13,6 +13,12 @@ class CartCubit extends Cubit<CartState> {
   String? _uid;
   StreamSubscription<List<CartItemEntity>>? _subscription;
 
+  /// مؤقّت تأجيل لكل منتج — لو المستخدم بيدوس على +/- بسرعة، مبنبعتش
+  /// طلب لـ Firestore على كل ضغطة (الردود ممكن توصل بترتيب مختلف عن
+  /// ترتيب الإرسال وترجّع الرقم المعروض لقيمة قديمة). بننتظر لحد ما
+  /// المستخدم يستقر على رقم، وبعدين نبعت القيمة النهائية بس مرة واحدة.
+  final Map<String, Timer> _quantityDebounceTimers = {};
+
   CartCubit({
     required CartRepository cartRepository,
     required ProductRepository productRepository,
@@ -24,6 +30,10 @@ class CartCubit extends Cubit<CartState> {
 
   void attachUser(String? uid) {
     _subscription?.cancel();
+    for (final timer in _quantityDebounceTimers.values) {
+      timer.cancel();
+    }
+    _quantityDebounceTimers.clear();
     _uid = uid;
 
     if (uid == null) {
@@ -63,36 +73,98 @@ class CartCubit extends Cubit<CartState> {
     return results.whereType<CartLineItem>().toList();
   }
 
-  Future<void> addToCart(String productId, {int quantity = 1}) {
+  /// بيضيف المنتج للسلة فورًا محليًا (لو عندنا نسخة المنتج جاهزة، زي
+  /// لما بننده من شاشة تفاصيل المنتج)، وبعدين يبعت الكتابة الفعلية
+  /// لـ Firestore في الخلفية من غير ما يعلّق الواجهة لحد ما الشبكة
+  /// تخلص — عشان المستخدم يحس إن الإضافة حصلت فورًا حتى لو النت بطيء.
+  /// الستريم (watchCart) هيصحّح أي فرق تلقائيًا لما البيانات الحقيقية
+  /// توصل من السيرفر.
+  Future<void> addToCart(
+    String productId, {
+    int quantity = 1,
+    ProductEntity? product,
+  }) async {
     final uid = _uid;
-    if (uid == null) return Future.value();
-    return _cartRepository.addToCart(
+    if (uid == null) return;
+
+    final currentState = state;
+    if (currentState is CartLoaded) {
+      final items = [...currentState.items];
+      final index = items.indexWhere((e) => e.product.id == productId);
+      if (index != -1) {
+        items[index] = items[index].copyWith(quantity: items[index].quantity + quantity);
+        emit(CartLoaded(items: items));
+      } else if (product != null) {
+        items.add(CartLineItem(product: product, quantity: quantity));
+        emit(CartLoaded(items: items));
+      }
+    }
+
+    unawaited(_cartRepository.addToCart(
       uid,
       CartItemEntity(productId: productId, quantity: quantity),
-    );
+    ));
   }
 
-  Future<void> updateQuantity(String productId, int quantity) {
+  Future<void> updateQuantity(String productId, int quantity) async {
     final uid = _uid;
-    if (uid == null) return Future.value();
-    return _cartRepository.updateQuantity(uid, productId, quantity);
+    if (uid == null) return;
+
+    final currentState = state;
+    if (currentState is CartLoaded) {
+      final items = [...currentState.items];
+      final index = items.indexWhere((e) => e.product.id == productId);
+      if (index != -1) {
+        if (quantity <= 0) {
+          items.removeAt(index);
+        } else {
+          items[index] = items[index].copyWith(quantity: quantity);
+        }
+        emit(CartLoaded(items: items));
+      }
+    }
+
+    // التحديث المحلي فوق ده بيحصل كل ضغطة، لكن الكتابة الفعلية
+    // لـ Firestore متأجّلة — كل ضغطة جديدة بتلغي المؤقّت القديم وتبدأ
+    // واحد جديد، فمهما المستخدم دوس بسرعة، غير آخر قيمة مستقرة هي
+    // اللي بتتبعت.
+    _quantityDebounceTimers[productId]?.cancel();
+    _quantityDebounceTimers[productId] = Timer(const Duration(milliseconds: 600), () {
+      _quantityDebounceTimers.remove(productId);
+      _cartRepository.updateQuantity(uid, productId, quantity);
+    });
   }
 
-  Future<void> removeItem(String productId) {
+  Future<void> removeItem(String productId) async {
     final uid = _uid;
-    if (uid == null) return Future.value();
-    return _cartRepository.removeFromCart(uid, productId);
+    if (uid == null) return;
+
+    final currentState = state;
+    if (currentState is CartLoaded) {
+      final items = currentState.items.where((e) => e.product.id != productId).toList();
+      emit(CartLoaded(items: items));
+    }
+
+    unawaited(_cartRepository.removeFromCart(uid, productId));
   }
 
-  Future<void> clearCart() {
+  Future<void> clearCart() async {
     final uid = _uid;
-    if (uid == null) return Future.value();
-    return _cartRepository.clearCart(uid);
+    if (uid == null) return;
+
+    if (state is CartLoaded) {
+      emit(const CartLoaded(items: []));
+    }
+
+    unawaited(_cartRepository.clearCart(uid));
   }
 
   @override
   Future<void> close() {
     _subscription?.cancel();
+    for (final timer in _quantityDebounceTimers.values) {
+      timer.cancel();
+    }
     return super.close();
   }
 }
