@@ -6,9 +6,29 @@ class OrderRemoteDataSource {
   OrderRemoteDataSource({FirebaseFirestore? firestore})
       : firestore = firestore ?? FirebaseFirestore.instance;
 
+  /// بيسجّل الطلب وفي نفس الوقت بيزوّد `salesCount` لكل منتج فيه —
+  /// Batch واحدة عشان لو كتابة أي منتج فشلت، الطلب نفسه ميتسجلش
+  /// ناقص. بنستخدم FieldValue.increment بدل قراءة القيمة الحالية
+  /// وتعديلها، عشان يفضل صحيح حتى لو أكتر من طلب بيحصل في نفس اللحظة.
   Future<String> createOrder(Map<String, dynamic> orderData) async {
-    final docRef = await firestore.collection('orders').add(orderData);
-    return docRef.id;
+    final orderRef = firestore.collection('orders').doc();
+    final batch = firestore.batch();
+    batch.set(orderRef, orderData);
+
+    final items = orderData['items'] as List? ?? const [];
+    for (final item in items) {
+      final itemData = Map<String, dynamic>.from(item as Map);
+      final productId = itemData['productId'] as String?;
+      final quantity = (itemData['quantity'] as num?)?.toInt() ?? 0;
+      if (productId == null || productId.isEmpty || quantity <= 0) continue;
+      batch.update(
+        firestore.collection('products').doc(productId),
+        {'salesCount': FieldValue.increment(quantity)},
+      );
+    }
+
+    await batch.commit();
+    return orderRef.id;
   }
 
   Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>> getOrders(String uid) async {

@@ -33,7 +33,6 @@ class HomeCubit extends Cubit<HomeState> {
       if (cached != null) {
         emit(HomeLoaded(
           categories: cached.categories,
-          featuredProducts: cached.featuredProducts,
           allProducts: cached.allProducts,
           banners: cached.banners,
         ));
@@ -45,26 +44,22 @@ class HomeCubit extends Cubit<HomeState> {
     try {
       final results = await Future.wait([
         _categoryRepository.getCategories(),
-        _productRepository.getProducts(featuredOnly: true),
         _productRepository.getProducts(),
         _bannerRepository.getBanners(),
       ]);
 
       final categories = results[0] as List<CategoryEntity>;
-      final featuredProducts = results[1] as List<ProductEntity>;
-      final allProducts = results[2] as List<ProductEntity>;
-      final banners = results[3] as List<BannerEntity>;
+      final allProducts = results[1] as List<ProductEntity>;
+      final banners = results[2] as List<BannerEntity>;
 
       emit(HomeLoaded(
         categories: categories,
-        featuredProducts: featuredProducts,
         allProducts: allProducts,
         banners: banners,
       ));
 
       unawaited(_cacheService.write(HomeCache(
         categories: categories,
-        featuredProducts: featuredProducts,
         allProducts: allProducts,
         banners: banners,
       )));

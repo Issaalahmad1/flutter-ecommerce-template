@@ -1,5 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 
+import 'package:customer_app/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:customer_app/features/auth/presentation/cubit/auth_state.dart';
 import 'package:customer_app/features/cart/presentation/cubit/cart_cubit.dart';
 import 'package:customer_app/features/favourite/presentation/cubit/favourite_cubit.dart';
 import 'package:customer_app/features/favourite/presentation/cubit/favourite_state.dart';
@@ -9,6 +11,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../cubit/product_cubit.dart';
 import '../cubit/product_state.dart';
+import 'reviews_screen.dart';
 
 class ProductDetailScreen extends StatelessWidget {
   final String productId;
@@ -17,6 +20,14 @@ class ProductDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // بيانات "آخر ما شاهدت" لتغذية نظام التوصية — بنسجّلها هنا (مش
+    // في ProductCubit) عشان تفضل مسؤولية Cubit المنتج محصورة في
+    // عرض تفاصيل المنتج نفسه بس.
+    final authState = context.read<AuthCubit>().state;
+    if (authState is AuthAuthenticated) {
+      RecentlyViewedRepositoryImpl().recordView(authState.user.uid, productId);
+    }
+
     return BlocProvider(
       create: (_) =>
           ProductCubit(productRepository: ProductRepositoryImpl())
@@ -173,9 +184,31 @@ class _ProductDetailBody extends StatelessWidget {
                                     context,
                                   ).textTheme.titleMedium,
                                 ),
-                                Text(
-                                  context.strings.reviewsCount(reviews.length),
-                                  style: TextStyle(color: brand.textSecondary),
+                                Row(
+                                  children: [
+                                    Text(
+                                      context.strings.reviewsCount(reviews.length),
+                                      style: TextStyle(color: brand.textSecondary),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    GestureDetector(
+                                      onTap: () => Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (_) => BlocProvider.value(
+                                            value: context.read<ProductCubit>(),
+                                            child: const ReviewsScreen(),
+                                          ),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        context.strings.seeAll,
+                                        style: TextStyle(
+                                          color: brand.accent,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),

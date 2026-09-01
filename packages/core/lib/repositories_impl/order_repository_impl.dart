@@ -1,15 +1,29 @@
-import 'package:decoze_core/core.dart';
+import 'dart:async';
 
+import 'package:decoze_core/core.dart';
 
 class OrderRepositoryImpl implements OrderRepository {
   final OrderRemoteDataSource remoteDataSource;
+  final NotificationRepository notificationRepository;
 
-  OrderRepositoryImpl({OrderRemoteDataSource? remoteDataSource})
-      : remoteDataSource = remoteDataSource ?? OrderRemoteDataSource();
+  OrderRepositoryImpl({
+    OrderRemoteDataSource? remoteDataSource,
+    NotificationRepository? notificationRepository,
+  })  : remoteDataSource = remoteDataSource ?? OrderRemoteDataSource(),
+        notificationRepository = notificationRepository ?? NotificationRepositoryImpl();
 
   @override
   Future<OrderEntity> placeOrder(OrderEntity order) async {
     final id = await remoteDataSource.createOrder(order.toJson());
+
+    // مش محتاجين ننتظر — لو فشل الإشعار لأي سبب، الطلب نفسه اتسجّل
+    // فعلًا وده الأهم؛ مش هدف كافي نوقف رحلة الشراء عشانه.
+    unawaited(notificationRepository.notifyAdminNewOrder(
+      orderId: id,
+      customerName: order.shippingAddress.fullName,
+      total: order.total,
+    ));
+
     return OrderEntity(
       id: id,
       userId: order.userId,
@@ -42,8 +56,13 @@ class OrderRepositoryImpl implements OrderRepository {
   }
 
   @override
-  Future<void> updateOrderStatus(String id, OrderStatus status) {
-    return remoteDataSource.updateOrderStatus(id, status.name);
+  Future<void> updateOrderStatus(OrderEntity order, OrderStatus status) async {
+    await remoteDataSource.updateOrderStatus(order.id, status.name);
+    unawaited(notificationRepository.notifyUserOrderStatusChanged(
+      uid: order.userId,
+      orderId: order.id,
+      status: status.name,
+    ));
   }
 
   @override

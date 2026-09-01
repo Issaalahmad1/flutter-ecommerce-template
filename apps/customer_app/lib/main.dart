@@ -9,6 +9,8 @@ import 'features/address/presentation/cubit/address_cubit.dart';
 import 'features/auth/presentation/cubit/auth_cubit.dart';
 import 'features/auth/presentation/cubit/auth_state.dart';
 import 'features/cart/presentation/cubit/cart_cubit.dart';
+import 'features/notifications/presentation/cubit/notification_center_cubit.dart';
+import 'features/recommendations/presentation/cubit/recommendation_cubit.dart';
 import 'features/settings/presentation/cubit/locale_cubit.dart';
 import 'firebase_options.dart';
 import 'features/favourite/presentation/cubit/favourite_cubit.dart';
@@ -62,6 +64,18 @@ class DecozeApp extends StatelessWidget {
         BlocProvider(
           create: (_) => AddressCubit(addressRepository: AddressRepositoryImpl()),
         ),
+        BlocProvider(
+          create: (_) =>
+              NotificationCenterCubit(notificationRepository: NotificationRepositoryImpl()),
+        ),
+        BlocProvider(
+          create: (_) => RecommendationCubit(
+            productRepository: ProductRepositoryImpl(),
+            orderRepository: OrderRepositoryImpl(),
+            favouriteRepository: FavouriteRepositoryImpl(),
+            recentlyViewedRepository: RecentlyViewedRepositoryImpl(),
+          ),
+        ),
         BlocProvider(create: (_) => LocaleCubit()),
       ],
       child: const _AppWithRouter(),
@@ -84,14 +98,20 @@ class _AppWithRouter extends StatelessWidget {
         final cartCubit = context.read<CartCubit>();
         final favouriteCubit = context.read<FavouriteCubit>();
         final addressCubit = context.read<AddressCubit>();
+        final notificationCenterCubit = context.read<NotificationCenterCubit>();
+        final recommendationCubit = context.read<RecommendationCubit>();
         if (state is AuthAuthenticated) {
           cartCubit.attachUser(state.user.uid);
           favouriteCubit.attachUser(state.user.uid);
           addressCubit.attachUser(state.user.uid);
+          notificationCenterCubit.attachUser(state.user.uid);
+          recommendationCubit.attachUser(state.user.uid);
         } else if (state is AuthUnauthenticated) {
           cartCubit.attachUser(null);
           favouriteCubit.attachUser(null);
           addressCubit.attachUser(null);
+          notificationCenterCubit.attachUser(null);
+          recommendationCubit.attachUser(null);
         }
       },
       child: BlocBuilder<LocaleCubit, Locale>(

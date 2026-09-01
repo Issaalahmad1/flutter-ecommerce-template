@@ -17,6 +17,24 @@ abstract class ProductRepository {
 
   Future<List<ReviewEntity>> getReviews(String productId);
 
+  Future<void> addReview({
+    required String productId,
+    required String userId,
+    required String userName,
+    String? userPhotoUrl,
+    required double rating,
+    required String comment,
+  });
+
+  Future<void> updateReview({
+    required String productId,
+    required String reviewId,
+    required double rating,
+    required String comment,
+  });
+
+  Future<void> deleteReview({required String productId, required String reviewId});
+
   /// دوال الأدمن — مطلوبة لـ admin_app بس، لكن العقد موحّد
   /// عشان الاتنين يستخدموا نفس الـ Entity ونفس شكل البيانات.
   Future<void> createProduct(ProductEntity product);

@@ -110,6 +110,8 @@ class _ProductsScreenBody extends StatelessWidget {
                         DataColumn(label: Text('Category')),
                         DataColumn(label: Text('Price')),
                         DataColumn(label: Text('Stock')),
+                        DataColumn(label: Text('Sold'), numeric: true),
+                        DataColumn(label: Text('Rating')),
                         DataColumn(label: Text('Status')),
                         DataColumn(label: Text('')),
                       ],
@@ -135,6 +137,19 @@ class _ProductsScreenBody extends StatelessWidget {
                               ),
                             ),
                             DataCell(Text('${product.stock}')),
+                            DataCell(Text('${product.salesCount}')),
+                            DataCell(
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.star, size: 14, color: Colors.amber),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '${product.rating.toStringAsFixed(1)} (${product.reviewCount})',
+                                  ),
+                                ],
+                              ),
+                            ),
                             DataCell(Text(product.status.name)),
                             DataCell(
                               Row(

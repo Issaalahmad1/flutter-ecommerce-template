@@ -5,19 +5,35 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../auth/presentation/cubit/admin_auth_cubit.dart';
 import '../../../categories/presentation/screens/categories_screen.dart';
+import '../../../notifications/presentation/cubit/admin_notifications_cubit.dart';
+import '../../../notifications/presentation/cubit/admin_notifications_state.dart';
+import '../../../notifications/presentation/screens/admin_notifications_screen.dart';
 import '../../../orders/presentation/screens/orders_screen.dart';
 import '../../../products/presentation/screens/products_screen.dart';
 import '../cubit/dashboard_cubit.dart';
 import '../cubit/dashboard_state.dart';
 
-class DashboardScreen extends StatefulWidget {
+class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
   @override
-  State<DashboardScreen> createState() => _DashboardScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) =>
+          AdminNotificationsCubit(notificationRepository: NotificationRepositoryImpl()),
+      child: const _DashboardScreenBody(),
+    );
+  }
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _DashboardScreenBody extends StatefulWidget {
+  const _DashboardScreenBody();
+
+  @override
+  State<_DashboardScreenBody> createState() => _DashboardScreenBodyState();
+}
+
+class _DashboardScreenBodyState extends State<_DashboardScreenBody> {
   int _selectedIndex = 0;
 
   static const _tabs = [
@@ -26,11 +42,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
     CategoriesScreen(),
     OrdersScreen(),
     BannersScreen(),
+    AdminNotificationsScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
     const brand = BrandConfig.decoze;
+    final unreadCount = context.select<AdminNotificationsCubit, int>((cubit) {
+      final state = cubit.state;
+      return state is AdminNotificationsLoaded ? state.unreadCount : 0;
+    });
 
     return Scaffold(
       body: Row(
@@ -66,32 +87,44 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
             ),
-            destinations: const [
-              
-              NavigationRailDestination(
+            destinations: [
+              const NavigationRailDestination(
                 icon: Icon(Icons.dashboard_outlined),
                 selectedIcon: Icon(Icons.dashboard),
                 label: Text('Dashboard'),
               ),
-              NavigationRailDestination(
+              const NavigationRailDestination(
                 icon: Icon(Icons.inventory_2_outlined),
                 selectedIcon: Icon(Icons.inventory_2),
                 label: Text('Products'),
               ),
-              NavigationRailDestination(
+              const NavigationRailDestination(
                 icon: Icon(Icons.category_outlined),
                 selectedIcon: Icon(Icons.category),
                 label: Text('Categories'),
               ),
-              NavigationRailDestination(
+              const NavigationRailDestination(
                 icon: Icon(Icons.receipt_long_outlined),
                 selectedIcon: Icon(Icons.receipt_long),
                 label: Text('Orders'),
               ),
-              NavigationRailDestination(
+              const NavigationRailDestination(
                 icon: Icon(Icons.view_carousel_outlined),
                 selectedIcon: Icon(Icons.view_carousel),
                 label: Text('Banners'),
+              ),
+              NavigationRailDestination(
+                icon: Badge(
+                  isLabelVisible: unreadCount > 0,
+                  label: Text('$unreadCount'),
+                  child: const Icon(Icons.notifications_outlined),
+                ),
+                selectedIcon: Badge(
+                  isLabelVisible: unreadCount > 0,
+                  label: Text('$unreadCount'),
+                  child: const Icon(Icons.notifications),
+                ),
+                label: const Text('Notifications'),
               ),
             ],
           ),

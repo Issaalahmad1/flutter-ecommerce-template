@@ -17,6 +17,11 @@ class ProductEntity extends Equatable {
   final ProductStatus status;
   final DateTime createdAt;
 
+  /// عدد القطع المباعة فعليًا — بيتزوّد أوتوماتيك كل ما حد يكمّل طلب
+  /// فيه المنتج ده (راجع OrderRemoteDataSource.createOrder)، مش رقم
+  /// بيحطه الأدمن يدويًا. ده اللي بيحدد ترتيب "الأكثر مبيعًا" فعليًا.
+  final int salesCount;
+
   /// لون المنتج (Hex زي '#8B5CF6') — اختياري، مش كل منتج لازم يكون
   /// ليه لون محدد (زي سجادة متعددة الألوان مثلاً).
   final String? color;
@@ -43,6 +48,7 @@ class ProductEntity extends Equatable {
     this.isFeatured = false,
     this.status = ProductStatus.active,
     required this.createdAt,
+    this.salesCount = 0,
     this.color,
     this.descriptionAr,
     this.descriptionEn,
@@ -66,6 +72,7 @@ class ProductEntity extends Equatable {
     bool? isFeatured,
     ProductStatus? status,
     DateTime? createdAt,
+    int? salesCount,
     String? color,
     bool clearColor = false,
     String? descriptionAr,
@@ -87,6 +94,7 @@ class ProductEntity extends Equatable {
       isFeatured: isFeatured ?? this.isFeatured,
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
+      salesCount: salesCount ?? this.salesCount,
       color: clearColor ? null : (color ?? this.color),
       descriptionAr: descriptionAr ?? this.descriptionAr,
       descriptionEn: descriptionEn ?? this.descriptionEn,
@@ -113,6 +121,7 @@ class ProductEntity extends Equatable {
         orElse: () => ProductStatus.active,
       ),
       createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
+      salesCount: json['salesCount'] as int? ?? 0,
       color: json['color'] as String?,
       descriptionAr: json['descriptionAr'] as String?,
       descriptionEn: json['descriptionEn'] as String?,
@@ -135,6 +144,7 @@ class ProductEntity extends Equatable {
       'isFeatured': isFeatured,
       'status': status.name,
       'createdAt': createdAt.toIso8601String(),
+      'salesCount': salesCount,
       'color': color,
       'descriptionAr': descriptionAr,
       'descriptionEn': descriptionEn,
@@ -158,6 +168,7 @@ class ProductEntity extends Equatable {
         isFeatured,
         status,
         createdAt,
+        salesCount,
         color,
         descriptionAr,
         descriptionEn,

@@ -85,7 +85,7 @@ class _OrdersScreenBody extends StatelessWidget {
                                 if (newStatus != null) {
                                   context
                                       .read<AdminOrdersCubit>()
-                                      .updateStatus(order.id, newStatus);
+                                      .updateStatus(order, newStatus);
                                 }
                               },
                             ),

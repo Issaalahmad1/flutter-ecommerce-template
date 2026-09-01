@@ -48,6 +48,45 @@ class ProductRepositoryImpl implements ProductRepository {
   }
 
   @override
+  Future<void> addReview({
+    required String productId,
+    required String userId,
+    required String userName,
+    String? userPhotoUrl,
+    required double rating,
+    required String comment,
+  }) {
+    final review = ReviewEntity(
+      id: '',
+      userId: userId,
+      userName: userName,
+      userPhotoUrl: userPhotoUrl,
+      rating: rating,
+      comment: comment,
+      createdAt: DateTime.now(),
+    );
+    return remoteDataSource.addReview(productId, review.toJson());
+  }
+
+  @override
+  Future<void> updateReview({
+    required String productId,
+    required String reviewId,
+    required double rating,
+    required String comment,
+  }) {
+    return remoteDataSource.updateReview(productId, reviewId, {
+      'rating': rating,
+      'comment': comment,
+    });
+  }
+
+  @override
+  Future<void> deleteReview({required String productId, required String reviewId}) {
+    return remoteDataSource.deleteReview(productId, reviewId);
+  }
+
+  @override
   Future<void> createProduct(ProductEntity product) {
     return remoteDataSource.createProduct(product.toJson());
   }

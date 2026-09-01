@@ -5,13 +5,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeCache {
   final List<CategoryEntity> categories;
-  final List<ProductEntity> featuredProducts;
   final List<ProductEntity> allProducts;
   final List<BannerEntity> banners;
 
   const HomeCache({
     required this.categories,
-    required this.featuredProducts,
     required this.allProducts,
     required this.banners,
   });
@@ -34,12 +32,6 @@ class HomeCacheService {
       return HomeCache(
         categories: (json['categories'] as List)
             .map((e) => CategoryEntity.fromJson(
-                  e['id'] as String,
-                  e as Map<String, dynamic>,
-                ))
-            .toList(),
-        featuredProducts: (json['products'] as List)
-            .map((e) => ProductEntity.fromJson(
                   e['id'] as String,
                   e as Map<String, dynamic>,
                 ))
@@ -68,7 +60,6 @@ class HomeCacheService {
     final prefs = await SharedPreferences.getInstance();
     final json = {
       'categories': cache.categories.map((c) => {...c.toJson(), 'id': c.id}).toList(),
-      'products': cache.featuredProducts.map((p) => {...p.toJson(), 'id': p.id}).toList(),
       'allProducts': cache.allProducts.map((p) => {...p.toJson(), 'id': p.id}).toList(),
       'banners': cache.banners.map((b) => {...b.toJson(), 'id': b.id}).toList(),
     };

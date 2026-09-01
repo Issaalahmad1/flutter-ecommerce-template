@@ -20,8 +20,8 @@ class AdminOrdersCubit extends Cubit<AdminOrdersState> {
     }
   }
 
-  Future<void> updateStatus(String orderId, OrderStatus status) async {
-    await _orderRepository.updateOrderStatus(orderId, status);
+  Future<void> updateStatus(OrderEntity order, OrderStatus status) async {
+    await _orderRepository.updateOrderStatus(order, status);
     await loadOrders();
   }
 }

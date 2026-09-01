@@ -1,9 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:customer_app/features/category/presentation/screens/category_screen.dart';
 import 'package:customer_app/features/favourite/presentation/screens/favourite_screen.dart';
+import 'package:customer_app/features/notifications/presentation/cubit/notification_center_cubit.dart';
+import 'package:customer_app/features/notifications/presentation/cubit/notification_center_state.dart';
+import 'package:customer_app/features/notifications/presentation/screens/notification_center_screen.dart';
 import 'package:customer_app/features/product/presentation/screens/product_detail_screen.dart';
 import 'package:customer_app/features/product/presentation/widgets/product_grid.dart';
 import 'package:customer_app/features/product/presentation/widgets/product_row.dart';
+import 'package:customer_app/features/recommendations/presentation/cubit/recommendation_cubit.dart';
+import 'package:customer_app/features/recommendations/presentation/cubit/recommendation_state.dart';
 import 'package:customer_app/features/search/presentation/screens/search_screen.dart';
 import 'package:customer_app/shared/category_image.dart';
 import 'package:decoze_core/core.dart';
@@ -77,6 +82,24 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             },
           ),
+          BlocBuilder<NotificationCenterCubit, NotificationCenterState>(
+            builder: (context, state) {
+              final unreadCount =
+                  state is NotificationCenterLoaded ? state.unreadCount : 0;
+              return IconButton(
+                icon: Badge(
+                  isLabelVisible: unreadCount > 0,
+                  label: Text('$unreadCount'),
+                  child: const Icon(Icons.notifications_outlined),
+                ),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const NotificationCenterScreen()),
+                  );
+                },
+              );
+            },
+          ),
           const SizedBox(width: 8),
         ],
       ),
@@ -88,7 +111,6 @@ class _HomeScreenState extends State<HomeScreen> {
             HomeError(:final message) => Center(child: Text(message)),
             HomeLoaded(
               :final categories,
-              :final featuredProducts,
               :final allProducts,
               :final banners,
             ) =>
@@ -155,6 +177,39 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     _CategoryRow(categories: categories),
                     const SizedBox(height: 24),
+                    BlocBuilder<RecommendationCubit, RecommendationState>(
+                      builder: (context, recState) {
+                        if (recState is! RecommendationLoaded ||
+                            recState.products.isEmpty) {
+                          return const SizedBox.shrink();
+                        }
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              child: Text(
+                                context.strings.recommendedForYou,
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            ProductRow(
+                              products: recState.products,
+                              onProductTap: (product) {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        ProductDetailScreen(productId: product.id),
+                                  ),
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 24),
+                          ],
+                        );
+                      },
+                    ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
@@ -164,7 +219,27 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 12),
                     ProductRow(
-                      products: featuredProducts,
+                      products: state.topSellingProducts,
+                      onProductTap: (product) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                ProductDetailScreen(productId: product.id),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        context.strings.topRated,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    ProductRow(
+                      products: state.topRatedProducts,
                       onProductTap: (product) {
                         Navigator.of(context).push(
                           MaterialPageRoute(

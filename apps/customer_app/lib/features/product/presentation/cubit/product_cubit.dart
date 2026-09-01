@@ -36,4 +36,46 @@ class ProductCubit extends Cubit<ProductState> {
       emit(const ProductError('حدث خطأ في تحميل تفاصيل المنتج.'));
     }
   }
+
+  /// بعد الإرسال بننادي loadProduct تاني عشان نجيب متوسط الـ rating
+  /// وعدد المراجعات الجديد اللي اتحسب في الـ Transaction، بدل ما نحسبه
+  /// تاني بنفس المنطق على الجهاز ونخاطر إنه يختلف عن اللي في السيرفر.
+  Future<void> submitReview(
+    String productId, {
+    required String userId,
+    required String userName,
+    String? userPhotoUrl,
+    required double rating,
+    required String comment,
+  }) async {
+    await _productRepository.addReview(
+      productId: productId,
+      userId: userId,
+      userName: userName,
+      userPhotoUrl: userPhotoUrl,
+      rating: rating,
+      comment: comment,
+    );
+    await loadProduct(productId);
+  }
+
+  Future<void> editReview(
+    String productId, {
+    required String reviewId,
+    required double rating,
+    required String comment,
+  }) async {
+    await _productRepository.updateReview(
+      productId: productId,
+      reviewId: reviewId,
+      rating: rating,
+      comment: comment,
+    );
+    await loadProduct(productId);
+  }
+
+  Future<void> removeReview(String productId, String reviewId) async {
+    await _productRepository.deleteReview(productId: productId, reviewId: reviewId);
+    await loadProduct(productId);
+  }
 }

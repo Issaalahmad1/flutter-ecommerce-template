@@ -10,7 +10,9 @@ abstract class AppStrings {
 
   // الصفحة الرئيسية
   String get topSelling;
+  String get topRated;
   String get discover;
+  String get recommendedForYou;
   String get offLabel;
   String get endsTomorrow;
   String endsInDays(int days);
@@ -112,6 +114,26 @@ abstract class AppStrings {
   String get userReviews;
   String reviewsCount(int count);
   String get noReviewsYet;
+  String get seeAll;
+  String get writeReview;
+  String get yourRating;
+  String get reviewCommentHint;
+  String get submitReview;
+  String get reviewSubmitted;
+  String get pleaseSelectRating;
+  String get signInToReview;
+  String get editReview;
+  String get deleteReview;
+  String get confirmDeleteReview;
+  String get reviewUpdated;
+  String get reviewDeleted;
+
+  // مركز الإشعارات
+  String get noNotificationsYet;
+  String get notifNewOrderTitle;
+  String notifNewOrderBody(String customerName, String amount);
+  String get notifOrderStatusTitle;
+  String notifOrderStatusBody(String orderId, String status);
 
   // تسجيل الدخول والتسجيل
   String get signIn;
@@ -185,7 +207,11 @@ class AppStringsAr implements AppStrings {
   @override
   String get topSelling => 'الأكثر مبيعًا';
   @override
+  String get topRated => 'الأعلى تقييمًا';
+  @override
   String get discover => 'اكتشف';
+  @override
+  String get recommendedForYou => 'مقترح لك';
   @override
   String get offLabel => 'خصم';
   @override
@@ -362,6 +388,45 @@ class AppStringsAr implements AppStrings {
   String reviewsCount(int count) => '+$count تقييم';
   @override
   String get noReviewsYet => 'لا توجد تقييمات بعد.';
+  @override
+  String get seeAll => 'عرض الكل';
+  @override
+  String get writeReview => 'اكتب تقييمًا';
+  @override
+  String get yourRating => 'تقييمك';
+  @override
+  String get reviewCommentHint => 'شاركنا رأيك في المنتج...';
+  @override
+  String get submitReview => 'إرسال التقييم';
+  @override
+  String get reviewSubmitted => 'تم إرسال تقييمك بنجاح.';
+  @override
+  String get pleaseSelectRating => 'من فضلك اختر تقييمًا أولًا.';
+  @override
+  String get signInToReview => 'سجّل الدخول لإضافة تقييم.';
+  @override
+  String get editReview => 'تعديل التقييم';
+  @override
+  String get deleteReview => 'حذف التقييم';
+  @override
+  String get confirmDeleteReview => 'متأكد إنك عايز تحذف تقييمك؟';
+  @override
+  String get reviewUpdated => 'تم تحديث تقييمك.';
+  @override
+  String get reviewDeleted => 'تم حذف تقييمك.';
+
+  @override
+  String get noNotificationsYet => 'لا توجد إشعارات حتى الآن.';
+  @override
+  String get notifNewOrderTitle => 'طلب جديد';
+  @override
+  String notifNewOrderBody(String customerName, String amount) =>
+      'طلب جديد من $customerName — $amount';
+  @override
+  String get notifOrderStatusTitle => 'تحديث على طلبك';
+  @override
+  String notifOrderStatusBody(String orderId, String status) =>
+      'طلبك #${orderId.substring(0, orderId.length < 6 ? orderId.length : 6)} بقى: $status';
 
   @override
   String get signIn => 'تسجيل الدخول';
@@ -479,7 +544,11 @@ class AppStringsEn implements AppStrings {
   @override
   String get topSelling => 'Top selling';
   @override
+  String get topRated => 'Top Rated';
+  @override
   String get discover => 'Discover';
+  @override
+  String get recommendedForYou => 'Recommended for you';
   @override
   String get offLabel => 'off';
   @override
@@ -656,6 +725,45 @@ class AppStringsEn implements AppStrings {
   String reviewsCount(int count) => '$count+ Reviews';
   @override
   String get noReviewsYet => 'No reviews yet.';
+  @override
+  String get seeAll => 'See all';
+  @override
+  String get writeReview => 'Write a Review';
+  @override
+  String get yourRating => 'Your Rating';
+  @override
+  String get reviewCommentHint => 'Share your thoughts about this product...';
+  @override
+  String get submitReview => 'Submit Review';
+  @override
+  String get reviewSubmitted => 'Your review has been submitted.';
+  @override
+  String get pleaseSelectRating => 'Please select a rating first.';
+  @override
+  String get signInToReview => 'Sign in to write a review.';
+  @override
+  String get editReview => 'Edit Review';
+  @override
+  String get deleteReview => 'Delete Review';
+  @override
+  String get confirmDeleteReview => 'Are you sure you want to delete your review?';
+  @override
+  String get reviewUpdated => 'Your review has been updated.';
+  @override
+  String get reviewDeleted => 'Your review has been deleted.';
+
+  @override
+  String get noNotificationsYet => 'No notifications yet.';
+  @override
+  String get notifNewOrderTitle => 'New order';
+  @override
+  String notifNewOrderBody(String customerName, String amount) =>
+      'New order from $customerName — $amount';
+  @override
+  String get notifOrderStatusTitle => 'Update on your order';
+  @override
+  String notifOrderStatusBody(String orderId, String status) =>
+      'Order #${orderId.substring(0, orderId.length < 6 ? orderId.length : 6)} is now: $status';
 
   @override
   String get signIn => 'Sign in';

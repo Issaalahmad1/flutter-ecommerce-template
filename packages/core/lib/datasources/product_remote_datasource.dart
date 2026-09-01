@@ -58,6 +58,66 @@ class ProductRemoteDataSource {
         .get();
     return snapshot.docs;
   }
+
+  Future<void> addReview(String productId, Map<String, dynamic> reviewData) async {
+    await firestore
+        .collection('products')
+        .doc(productId)
+        .collection('reviews')
+        .add(reviewData);
+    await _recalculateRating(productId);
+  }
+
+  Future<void> updateReview(
+    String productId,
+    String reviewId,
+    Map<String, dynamic> reviewData,
+  ) async {
+    await firestore
+        .collection('products')
+        .doc(productId)
+        .collection('reviews')
+        .doc(reviewId)
+        .update(reviewData);
+    await _recalculateRating(productId);
+  }
+
+  Future<void> deleteReview(String productId, String reviewId) async {
+    await firestore
+        .collection('products')
+        .doc(productId)
+        .collection('reviews')
+        .doc(reviewId)
+        .delete();
+    await _recalculateRating(productId);
+  }
+
+  /// بيعيد حساب متوسط الـ rating وعدد المراجعات من واقع كل المراجعات
+  /// الموجودة فعليًا تحت المنتج — مش بحساب تراكمي (زيادة/نقصان) ممكن
+  /// يتراكم فيه خطأ صغير مع الوقت، خصوصًا بعد تعديل أو حذف تقييم.
+  Future<void> _recalculateRating(String productId) async {
+    final reviewsSnapshot = await firestore
+        .collection('products')
+        .doc(productId)
+        .collection('reviews')
+        .get();
+
+    final count = reviewsSnapshot.docs.length;
+    double rating = 0;
+    if (count > 0) {
+      final sum = reviewsSnapshot.docs.fold<double>(
+        0,
+        (total, doc) => total + ((doc.data()['rating'] as num?)?.toDouble() ?? 0),
+      );
+      rating = double.parse((sum / count).toStringAsFixed(2));
+    }
+
+    await firestore.collection('products').doc(productId).update({
+      'reviewCount': count,
+      'rating': rating,
+    });
+  }
+
     Future<void> createProduct(Map<String, dynamic> data) {
     return firestore.collection('products').add(data);
   }
