@@ -1,0 +1,45 @@
+rules_version = '2';
+
+// Starter Cloud Storage security rules matching the upload paths this
+// template uses (product/category/banner images from the admin app,
+// profile photos from the customer app). Paste this into Firebase Console
+// > Storage > Rules after you connect your own project — see the root
+// README's "Getting Started" section.
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Cross-service read of the caller's own Firestore user document —
+    // needs the "role" field set to "admin" the same way the Firestore
+    // rules do (see firestore.rules in this folder).
+    function isAdmin() {
+      return isSignedIn() &&
+        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Profile photos — public read, only the owner can upload their own.
+    match /users/{uid}/{fileName} {
+      allow read: if true;
+      allow write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Catalog images — public read, admin-only upload.
+    match /products/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /categories/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /banners/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

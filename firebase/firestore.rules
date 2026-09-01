@@ -1,0 +1,80 @@
+rules_version = '2';
+
+// Starter Firestore security rules matching the data model this template
+// uses out of the box. Paste this into Firebase Console > Firestore
+// Database > Rules (or deploy via the Firebase CLI) after you connect your
+// own project — see the root README's "Getting Started" section.
+//
+// Review and tighten these before shipping to real users; this is a
+// reasonable starting point, not a guarantee of correctness for every
+// custom field you add.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Admin access is granted by setting `role: "admin"` on a user's own
+    // document in `users/{uid}` (see README — done manually from the
+    // Firestore Console for the first admin account).
+    function isAdmin() {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid) || isAdmin();
+      allow delete: if false;
+
+      match /addresses/{addressId} {
+        allow read, write: if isOwner(uid);
+      }
+
+      match /favorites/{productId} {
+        allow read, write: if isOwner(uid);
+      }
+    }
+
+    match /carts/{uid} {
+      allow read, write: if isOwner(uid);
+    }
+
+    // Catalog data — public read (storefront browsing without sign-in),
+    // writes restricted to the admin dashboard.
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+
+      match /reviews/{reviewId} {
+        allow read: if true;
+        allow create: if isSignedIn();
+        allow update, delete: if isAdmin();
+      }
+    }
+
+    match /banners/{bannerId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /orders/{orderId} {
+      allow read: if isSignedIn() &&
+        (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+  }
+}

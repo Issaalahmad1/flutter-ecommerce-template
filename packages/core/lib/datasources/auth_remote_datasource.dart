@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import '../config/app_config.dart';
+
 /// الطبقة الوحيدة في المشروع اللي بتكلم Firebase SDK مباشرة لأي حاجة
 /// خاصة بالـ Auth. الـ Repository (في data/repositories) بيستخدمها
 /// وبيحوّل نتايجها لـ UserEntity، بدل ما يتكلم مع Firebase بنفسه.
@@ -49,8 +51,7 @@ class AuthRemoteDataSource {
   Future<void> _ensureGoogleSignInInitialized() async {
   if (_googleSignInInitialized) return;
   await GoogleSignIn.instance.initialize(
-    serverClientId:
-        'REDACTED-GOOGLE-SIGNIN-CLIENT-ID',
+    serverClientId: AppConfig.googleSignInServerClientId,
   );
   _googleSignInInitialized = true;
 }

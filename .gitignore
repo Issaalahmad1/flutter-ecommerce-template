@@ -15,6 +15,12 @@ melos_*.iml
 **/.firebase/
 **/google-services.json
 **/GoogleService-Info.plist
+**/firebase.json
+
+# App-specific credentials (Google Sign-In web client ID, etc.) — كل حد
+# بيحط بياناته الخاصة في app_config.dart، النسخة اللي بتتنشر على git هي
+# app_config.example.dart بس
+**/lib/config/app_config.dart
 
 # IDE
 .idea/
