@@ -2,6 +2,9 @@ import 'package:decoze_core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../cubit/search_state.dart';
+import 'category_filter_section.dart';
+import 'color_filter_section.dart';
+import 'price_range_filter.dart';
 
 /// نافذة الفلترة اليدوية (سعر/فئة/فئة فرعية/لون) — بتترجع [SearchFilters]
 /// جديدة لما المستخدم يضغط "Apply"، أو null لو قفل من غير تطبيق.
@@ -52,6 +55,29 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
     return _categories.expand((c) => c.subcategories).toSet().toList();
   }
 
+  void _toggleCategory(String categoryId) {
+    setState(() {
+      _categoryId = _categoryId == categoryId ? null : categoryId;
+      if (!_availableSubcategories.contains(_subcategory)) {
+        _subcategory = null;
+      }
+    });
+  }
+
+  void _toggleSubcategory(String subcategory) {
+    setState(() => _subcategory = _subcategory == subcategory ? null : subcategory);
+  }
+
+  void _toggleColor(String color) {
+    setState(() {
+      if (_colors.contains(color)) {
+        _colors.remove(color);
+      } else {
+        _colors.add(color);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     const brand = BrandConfig.decoze;
@@ -97,96 +123,21 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                         controller: scrollController,
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         children: [
-                          _SectionTitle(strings.priceRange, brand: brand),
-                          Slider(
-                            value: _maxPrice,
-                            min: 0,
-                            max: 1500,
-                            divisions: 15,
-                            activeColor: brand.accent,
-                            label: '${brand.currencySymbol}${_maxPrice.round()}',
+                          PriceRangeFilter(
+                            maxPrice: _maxPrice,
                             onChanged: (value) => setState(() => _maxPrice = value),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text('${brand.currencySymbol}0',
-                                    style: TextStyle(color: brand.textSecondary)),
-                                Text(
-                                  '${strings.upTo} ${brand.currencySymbol}${_maxPrice.round()}',
-                                  style: TextStyle(color: brand.accent, fontWeight: FontWeight.bold),
-                                ),
-                                Text('${brand.currencySymbol}1500',
-                                    style: TextStyle(color: brand.textSecondary)),
-                              ],
-                            ),
+                          const SizedBox(height: 16),
+                          CategoryFilterSection(
+                            categories: _categories,
+                            selectedCategoryId: _categoryId,
+                            onCategoryTap: _toggleCategory,
+                            availableSubcategories: _availableSubcategories,
+                            selectedSubcategory: _subcategory,
+                            onSubcategoryTap: _toggleSubcategory,
                           ),
                           const SizedBox(height: 16),
-                          _SectionTitle(strings.filterCategories, brand: brand),
-                          const SizedBox(height: 8),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: [
-                              for (final category in _categories)
-                                _FilterChip(
-                                  label: category.name,
-                                  isSelected: _categoryId == category.id,
-                                  brand: brand,
-                                  onTap: () => setState(() {
-                                    _categoryId =
-                                        _categoryId == category.id ? null : category.id;
-                                    if (!_availableSubcategories.contains(_subcategory)) {
-                                      _subcategory = null;
-                                    }
-                                  }),
-                                ),
-                            ],
-                          ),
-                          if (_availableSubcategories.isNotEmpty) ...[
-                            const SizedBox(height: 16),
-                            _SectionTitle(strings.filterProducts, brand: brand),
-                            const SizedBox(height: 8),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: [
-                                for (final sub in _availableSubcategories)
-                                  _FilterChip(
-                                    label: sub,
-                                    isSelected: _subcategory == sub,
-                                    brand: brand,
-                                    onTap: () => setState(
-                                      () => _subcategory = _subcategory == sub ? null : sub,
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ],
-                          const SizedBox(height: 16),
-                          _SectionTitle(strings.filterColors, brand: brand),
-                          const SizedBox(height: 8),
-                          Wrap(
-                            spacing: 12,
-                            runSpacing: 12,
-                            children: [
-                              for (final entry in ProductColorPalette.colors.entries)
-                                _ColorSwatch(
-                                  color: ProductColorPalette.toColor(entry.value),
-                                  isSelected: _colors.contains(entry.value),
-                                  brand: brand,
-                                  onTap: () => setState(() {
-                                    if (_colors.contains(entry.value)) {
-                                      _colors.remove(entry.value);
-                                    } else {
-                                      _colors.add(entry.value);
-                                    }
-                                  }),
-                                ),
-                            ],
-                          ),
+                          ColorFilterSection(selectedColors: _colors, onColorTap: _toggleColor),
                           const SizedBox(height: 24),
                         ],
                       ),
@@ -200,9 +151,7 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                       backgroundColor: brand.accent,
                       foregroundColor: brand.onAccent,
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     onPressed: () => Navigator.of(context).pop(
                       SearchFilters(
@@ -223,96 +172,6 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
           ),
         );
       },
-    );
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  final String text;
-  final BrandConfig brand;
-
-  const _SectionTitle(this.text, {required this.brand});
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: TextStyle(
-        color: brand.textPrimary,
-        fontSize: 15,
-        fontWeight: FontWeight.w600,
-      ),
-    );
-  }
-}
-
-class _FilterChip extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final BrandConfig brand;
-  final VoidCallback onTap;
-
-  const _FilterChip({
-    required this.label,
-    required this.isSelected,
-    required this.brand,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? brand.accent : brand.surface,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? brand.onAccent : brand.textPrimary,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ColorSwatch extends StatelessWidget {
-  final Color color;
-  final bool isSelected;
-  final BrandConfig brand;
-  final VoidCallback onTap;
-
-  const _ColorSwatch({
-    required this.color,
-    required this.isSelected,
-    required this.brand,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: isSelected ? brand.accent : Colors.transparent,
-            width: 3,
-          ),
-        ),
-        child: isSelected
-            ? const Icon(Icons.check, size: 16, color: Colors.white)
-            : null,
-      ),
     );
   }
 }

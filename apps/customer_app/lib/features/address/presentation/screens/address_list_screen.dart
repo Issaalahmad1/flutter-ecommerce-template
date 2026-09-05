@@ -21,7 +21,9 @@ class AddressListScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isSelecting ? strings.selectAddress : strings.addressesTitle),
+        title: Text(
+          isSelecting ? strings.selectAddress : strings.addressesTitle,
+        ),
       ),
       body: BlocBuilder<AddressCubit, AddressState>(
         builder: (context, state) {
@@ -38,25 +40,29 @@ class AddressListScreen extends StatelessWidget {
             );
           }
 
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: state.addresses.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 12),
-            itemBuilder: (context, index) {
-              final address = state.addresses[index];
-              return _AddressCard(
-                address: address,
-                isSelecting: isSelecting,
-                onTap: isSelecting ? () => Navigator.of(context).pop(address) : null,
-              );
-            },
+          return ResponsiveContent(
+            child: ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: state.addresses.length,
+              separatorBuilder: (_, _) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final address = state.addresses[index];
+                return _AddressCard(
+                  address: address,
+                  isSelecting: isSelecting,
+                  onTap: isSelecting
+                      ? () => Navigator.of(context).pop(address)
+                      : null,
+                );
+              },
+            ),
           );
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const AddressFormScreen()),
-        ),
+        onPressed: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const AddressFormScreen())),
         icon: const Icon(Icons.add),
         label: Text(strings.addAddress),
       ),
@@ -69,7 +75,11 @@ class _AddressCard extends StatelessWidget {
   final bool isSelecting;
   final VoidCallback? onTap;
 
-  const _AddressCard({required this.address, required this.isSelecting, this.onTap});
+  const _AddressCard({
+    required this.address,
+    required this.isSelecting,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +94,9 @@ class _AddressCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: brand.surface,
           borderRadius: BorderRadius.circular(14),
-          border: address.isDefault ? Border.all(color: brand.accent, width: 1.5) : null,
+          border: address.isDefault
+              ? Border.all(color: brand.accent, width: 1.5)
+              : null,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -101,7 +113,10 @@ class _AddressCard extends StatelessWidget {
                 ),
                 if (address.isDefault)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: brand.accent.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(6),
@@ -118,8 +133,14 @@ class _AddressCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            Text(address.fullName, style: TextStyle(color: brand.textSecondary)),
-            Text(address.summaryLine, style: TextStyle(color: brand.textSecondary)),
+            Text(
+              address.fullName,
+              style: TextStyle(color: brand.textSecondary),
+            ),
+            Text(
+              address.summaryLine,
+              style: TextStyle(color: brand.textSecondary),
+            ),
             Text(address.phone, style: TextStyle(color: brand.textSecondary)),
             if (!isSelecting) ...[
               const Divider(height: 24),
@@ -128,8 +149,9 @@ class _AddressCard extends StatelessWidget {
                 children: [
                   if (!address.isDefault)
                     TextButton(
-                      onPressed: () =>
-                          context.read<AddressCubit>().setDefaultAddress(address.id),
+                      onPressed: () => context
+                          .read<AddressCubit>()
+                          .setDefaultAddress(address.id),
                       child: Text(strings.setAsDefault),
                     ),
                   TextButton(
@@ -172,7 +194,10 @@ class _AddressCard extends StatelessWidget {
               Navigator.of(dialogContext).pop();
               context.read<AddressCubit>().deleteAddress(addressId);
             },
-            child: Text(strings.deleteAddress, style: const TextStyle(color: Colors.red)),
+            child: Text(
+              strings.deleteAddress,
+              style: const TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),

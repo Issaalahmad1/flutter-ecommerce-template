@@ -1,25 +1,9 @@
 import 'package:decoze_core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_svg/svg.dart';
 
-/// بيحوّل أي مسافة لشرطة تلقائيًا وهي بتتكتب، وبيمنع أي حرف غير
-/// مسموح به في ID (بس حروف صغيرة، أرقام، وشرطة) — عشان الأدمن
-/// (اللي مش مبرمج) ما يقدرش يغلط حتى لو حاول.
-class _CategoryIdFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    var text = newValue.text.toLowerCase().replaceAll(' ', '-');
-    text = text.replaceAll(RegExp(r'[^a-z0-9-]'), '');
-    return TextEditingValue(
-      text: text,
-      selection: TextSelection.collapsed(offset: text.length),
-    );
-  }
-}
+import 'category_icon_picker.dart';
+import 'category_id_formatter.dart';
+import 'category_subcategories_field.dart';
 
 class CategoryFormDialog extends StatefulWidget {
   final CategoryEntity? category;
@@ -41,8 +25,7 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _idController;
   late final TextEditingController _nameController;
-  final TextEditingController _newSubcategoryController =
-      TextEditingController();
+  final TextEditingController _newSubcategoryController = TextEditingController();
   String? _selectedIconKey;
   final Set<String> _selectedSubcategories = {};
   late final List<String> _suggestedSubcategories;
@@ -58,8 +41,8 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
     _nameController = TextEditingController(text: category?.name ?? '');
     _selectedSubcategories.addAll(category?.subcategories ?? []);
 
-    // نجمع كل الفئات الفرعية اللي اتكتبت قبل كده في أي فئة تانية،
-    // عشان نعرضها كاقتراحات جاهزة بدل ما الأدمن يكتبها من الصفر.
+    // نجمع كل الفئات الفرعية اللي اتكتبت قبل كده في أي فئة تانية، عشان
+    // نعرضها كاقتراحات جاهزة بدل ما الأدمن يكتبها من الصفر.
     final allSubs = <String>{};
     for (final c in widget.allCategories) {
       allSubs.addAll(c.subcategories);
@@ -89,6 +72,16 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
     });
   }
 
+  void _toggleSuggestedSubcategory(String sub) {
+    setState(() {
+      if (_selectedSubcategories.contains(sub)) {
+        _selectedSubcategories.remove(sub);
+      } else {
+        _selectedSubcategories.add(sub);
+      }
+    });
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -113,11 +106,6 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
 
   @override
   Widget build(BuildContext context) {
-    // الفئات الفرعية الجديدة اللي الأدمن ضافها بنفسه (مش من الاقتراحات).
-    final customSubcategories = _selectedSubcategories
-        .where((s) => !_suggestedSubcategories.contains(s))
-        .toList();
-
     return AlertDialog(
       title: Text(_isEditing ? 'Edit category' : 'Add category'),
       content: SizedBox(
@@ -128,12 +116,10 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const SizedBox(height: 8),
-
                 TextFormField(
                   controller: _idController,
                   enabled: !_isEditing,
-                  inputFormatters: [_CategoryIdFormatter()],
+                  inputFormatters: [CategoryIdFormatter()],
                   decoration: InputDecoration(
                     labelText: 'ID',
                     helperText: _isEditing
@@ -141,145 +127,35 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
                         : 'حروف صغيرة وأرقام بس، بدون مسافات — استخدم شرطة (-) بدلها. مثال: bed-room',
                     helperMaxLines: 2,
                   ),
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'مطلوب' : null,
+                  validator: (v) => (v == null || v.trim().isEmpty) ? 'مطلوب' : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _nameController,
                   decoration: const InputDecoration(labelText: 'Name'),
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'مطلوب' : null,
+                  validator: (v) => (v == null || v.trim().isEmpty) ? 'مطلوب' : null,
                 ),
                 const SizedBox(height: 16),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Choose a ready-made icon:',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: CategoryIconLibrary.icons.entries.map((entry) {
-                    final isSelected = _selectedIconKey == entry.value;
-                    return GestureDetector(
-                      onTap: () => setState(() {
-                        _selectedIconKey = isSelected ? null : entry.value;
-                      }),
-                      child: Container(
-                        width: 64,
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: isSelected ? Colors.white24 : Colors.black12,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: isSelected
-                                ? Colors.lightGreenAccent
-                                : Colors.transparent,
-                            width: 2,
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            SvgPicture.asset(
-                              CategoryIconLibrary.assetPath(entry.value),
-                              height: 28,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              entry.key,
-                              style: const TextStyle(fontSize: 9),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }).toList(),
+                CategoryIconPicker(
+                  selectedIconKey: _selectedIconKey,
+                  onChanged: (value) => setState(() => _selectedIconKey = value),
                 ),
                 const SizedBox(height: 16),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Subcategories',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
+                CategorySubcategoriesField(
+                  selectedSubcategories: _selectedSubcategories,
+                  suggestedSubcategories: _suggestedSubcategories,
+                  newSubcategoryController: _newSubcategoryController,
+                  onToggleSuggested: _toggleSuggestedSubcategory,
+                  onAddCustom: _addCustomSubcategory,
+                  onRemoveCustom: (sub) => setState(() => _selectedSubcategories.remove(sub)),
                 ),
-                const SizedBox(height: 8),
-                if (_suggestedSubcategories.isNotEmpty)
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: _suggestedSubcategories.map((sub) {
-                      final isSelected = _selectedSubcategories.contains(sub);
-                      return FilterChip(
-                        label: Text(sub, style: const TextStyle(fontSize: 12)),
-                        selected: isSelected,
-                        onSelected: (selected) => setState(() {
-                          if (selected) {
-                            _selectedSubcategories.add(sub);
-                          } else {
-                            _selectedSubcategories.remove(sub);
-                          }
-                        }),
-                      );
-                    }).toList(),
-                  ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: _newSubcategoryController,
-                        decoration: const InputDecoration(
-                          labelText: 'Add new subcategory',
-                          isDense: true,
-                        ),
-                        onFieldSubmitted: (_) => _addCustomSubcategory(),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      icon: const Icon(Icons.add_circle_outline),
-                      onPressed: _addCustomSubcategory,
-                    ),
-                  ],
-                ),
-                if (customSubcategories.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: customSubcategories
-                        .map(
-                          (sub) => Chip(
-                            label: Text(
-                              sub,
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                            onDeleted: () => setState(
-                              () => _selectedSubcategories.remove(sub),
-                            ),
-                          ),
-                        )
-                        .toList(),
-                  ),
-                ],
               ],
             ),
           ),
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-            const SizedBox(height: 8),
-
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
         ElevatedButton(
           onPressed: _isSaving ? null : _submit,
           child: _isSaving

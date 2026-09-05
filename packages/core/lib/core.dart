@@ -52,10 +52,17 @@ export 'repositories_impl/banner_repository_impl.dart';
 export 'repositories/storage_repository.dart';
 export 'repositories_impl/storage_repository_impl.dart';
 
+export 'entities/onboarding_slide_entity.dart';
+export 'repositories/onboarding_slide_repository.dart';
+export 'datasources/onboarding_slide_remote_datasource.dart';
+export 'repositories_impl/onboarding_slide_repository_impl.dart';
+
 export 'utils/discount_calculator.dart';
 export 'utils/category_icon_library.dart';
 export 'utils/product_color_palette.dart';
 export 'utils/recommendation_engine.dart';
+export 'utils/responsive.dart';
+export 'widgets/responsive_content.dart';
 
 export 'repositories/search_repository.dart';
 export 'repositories_impl/search_repository_impl.dart';

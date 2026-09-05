@@ -37,7 +37,8 @@ class HomeLoaded extends HomeState {
 
   /// الأعلى تقييمًا — نفس منتجات الكتالوج، بس مرتّبين حسب `rating`.
   List<ProductEntity> get topRatedProducts {
-    final sorted = [...allProducts]..sort((a, b) => b.rating.compareTo(a.rating));
+    final sorted = [...allProducts]
+      ..sort((a, b) => b.rating.compareTo(a.rating));
     return sorted.take(10).toList();
   }
 

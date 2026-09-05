@@ -18,7 +18,8 @@ class NotificationCenterScreen extends StatelessWidget {
       appBar: AppBar(title: Text(strings.notificationsTitle)),
       body: BlocBuilder<NotificationCenterCubit, NotificationCenterState>(
         builder: (context, state) {
-          if (state is! NotificationCenterLoaded || state.notifications.isEmpty) {
+          if (state is! NotificationCenterLoaded ||
+              state.notifications.isEmpty) {
             return Center(
               child: Text(
                 strings.noNotificationsYet,
@@ -27,14 +28,16 @@ class NotificationCenterScreen extends StatelessWidget {
             );
           }
 
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: state.notifications.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 10),
-            itemBuilder: (context, index) {
-              final notification = state.notifications[index];
-              return _NotificationTile(notification: notification);
-            },
+          return ResponsiveContent(
+            child: ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: state.notifications.length,
+              separatorBuilder: (_, _) => const SizedBox(height: 10),
+              itemBuilder: (context, index) {
+                final notification = state.notifications[index];
+                return _NotificationTile(notification: notification);
+              },
+            ),
           );
         },
       ),
@@ -78,7 +81,9 @@ class _NotificationTile extends StatelessWidget {
         }
         if (orderId != null && orderId.isNotEmpty) {
           Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => TrackOrderScreen(orderId: orderId)),
+            MaterialPageRoute(
+              builder: (_) => TrackOrderScreen(orderId: orderId),
+            ),
           );
         }
       },
@@ -99,7 +104,10 @@ class _NotificationTile extends StatelessWidget {
                 margin: const EdgeInsets.only(top: 6, left: 4, right: 8),
                 width: 8,
                 height: 8,
-                decoration: BoxDecoration(color: brand.accent, shape: BoxShape.circle),
+                decoration: BoxDecoration(
+                  color: brand.accent,
+                  shape: BoxShape.circle,
+                ),
               ),
             Expanded(
               child: Column(
@@ -108,7 +116,9 @@ class _NotificationTile extends StatelessWidget {
                   Text(
                     title,
                     style: TextStyle(
-                      fontWeight: notification.isRead ? FontWeight.normal : FontWeight.bold,
+                      fontWeight: notification.isRead
+                          ? FontWeight.normal
+                          : FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 4),

@@ -3,6 +3,9 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../shared/widgets/admin_image_picker.dart';
+import 'banner_expiry_picker.dart';
+
 class BannerFormDialog extends StatefulWidget {
   final List<CategoryEntity> categories;
   final BannerEntity? banner;
@@ -40,9 +43,7 @@ class _BannerFormDialogState extends State<BannerFormDialog> {
     final banner = widget.banner;
     _titleController = TextEditingController(text: banner?.title ?? '');
     _subtitleController = TextEditingController(text: banner?.subtitle ?? '');
-    _discountController = TextEditingController(
-      text: banner?.discountLabel ?? '',
-    );
+    _discountController = TextEditingController(text: banner?.discountLabel ?? '');
     _selectedCategoryId = banner?.categoryId;
     _isActive = banner?.isActive ?? true;
     _expiresAt = banner?.expiresAt;
@@ -78,10 +79,7 @@ class _BannerFormDialogState extends State<BannerFormDialog> {
     if (_pickedImageBytes != null) {
       final storageRepository = StorageRepositoryImpl();
       final path = 'banners/${DateTime.now().millisecondsSinceEpoch}.jpg';
-      imageUrl = await storageRepository.uploadImage(
-        bytes: _pickedImageBytes!,
-        path: path,
-      );
+      imageUrl = await storageRepository.uploadImage(bytes: _pickedImageBytes!, path: path);
     }
 
     final banner = BannerEntity(
@@ -115,78 +113,23 @@ class _BannerFormDialogState extends State<BannerFormDialog> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // منطقة معاينة الصورة + زرار الاختيار
-                GestureDetector(
+                AdminImagePicker(
+                  pickedImageBytes: _pickedImageBytes,
+                  existingImageUrl: _existingImageUrl,
                   onTap: _pickImage,
-                  child: Container(
-                    height: 140,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.black12,
-                      borderRadius: BorderRadius.circular(10),
-                      image: _pickedImageBytes != null
-                          ? DecorationImage(
-                              image: MemoryImage(_pickedImageBytes!),
-                              fit: BoxFit.cover,
-                            )
-                          : (_existingImageUrl != null
-                                ? DecorationImage(
-                                    image: NetworkImage(_existingImageUrl!),
-                                    fit: BoxFit.cover,
-                                  )
-                                : null),
-                    ),
-                    child:
-                        (_pickedImageBytes == null && _existingImageUrl == null)
-                        ? const Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.add_photo_alternate_outlined,
-                                  size: 32,
-                                ),
-                                SizedBox(height: 6),
-                                Text('اختر صورة للبانر'),
-                              ],
-                            ),
-                          )
-                        : Align(
-                            alignment: Alignment.bottomRight,
-                            child: Container(
-                              margin: const EdgeInsets.all(8),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.black54,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: const Text(
-                                'تغيير الصورة',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                          ),
-                  ),
+                  placeholderLabel: 'اختر صورة للبانر',
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _titleController,
                   decoration: const InputDecoration(labelText: 'Title'),
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'مطلوب' : null,
+                  validator: (v) => (v == null || v.trim().isEmpty) ? 'مطلوب' : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _subtitleController,
                   decoration: const InputDecoration(labelText: 'Subtitle'),
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'مطلوب' : null,
+                  validator: (v) => (v == null || v.trim().isEmpty) ? 'مطلوب' : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -213,17 +156,14 @@ class _BannerFormDialogState extends State<BannerFormDialog> {
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String?>(
                   initialValue: _selectedCategoryId,
-                  decoration: const InputDecoration(
-                    labelText: 'Linked category (optional)',
-                  ),
+                  decoration: const InputDecoration(labelText: 'Linked category (optional)'),
                   items: [
                     const DropdownMenuItem(value: null, child: Text('None')),
                     ...widget.categories.map(
                       (c) => DropdownMenuItem(value: c.id, child: Text(c.name)),
                     ),
                   ],
-                  onChanged: (value) =>
-                      setState(() => _selectedCategoryId = value),
+                  onChanged: (value) => setState(() => _selectedCategoryId = value),
                 ),
                 const SizedBox(height: 8),
                 SwitchListTile(
@@ -233,57 +173,9 @@ class _BannerFormDialogState extends State<BannerFormDialog> {
                   onChanged: (v) => setState(() => _isActive = v),
                 ),
                 const SizedBox(height: 8),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(
-                    _expiresAt == null
-                        ? 'No expiry date'
-                        : 'Expires: ${_expiresAt!.day}/${_expiresAt!.month}/${_expiresAt!.year}',
-                  ),
-                  trailing: Wrap(
-                    spacing: 4,
-                    children: [
-                      TextButton(
-                        onPressed: () async {
-                          final pickedDate = await showDatePicker(
-                            context: context,
-                            initialDate:
-                                _expiresAt ??
-                                DateTime.now().add(const Duration(days: 7)),
-                            firstDate: DateTime.now(),
-                            lastDate: DateTime.now().add(
-                              const Duration(days: 365),
-                            ),
-                          );
-                          if (pickedDate == null || !context.mounted) return;
-
-                          final pickedTime = await showTimePicker(
-                            context: context,
-                            initialTime: _expiresAt != null
-                                ? TimeOfDay.fromDateTime(_expiresAt!)
-                                : const TimeOfDay(hour: 23, minute: 59),
-                          );
-                          if (pickedTime == null) return;
-
-                          setState(() {
-                            _expiresAt = DateTime(
-                              pickedDate.year,
-                              pickedDate.month,
-                              pickedDate.day,
-                              pickedTime.hour,
-                              pickedTime.minute,
-                            );
-                          });
-                        },
-                        child: const Text('Set date'),
-                      ),
-                      if (_expiresAt != null)
-                        TextButton(
-                          onPressed: () => setState(() => _expiresAt = null),
-                          child: const Text('Clear'),
-                        ),
-                    ],
-                  ),
+                BannerExpiryPicker(
+                  expiresAt: _expiresAt,
+                  onChanged: (value) => setState(() => _expiresAt = value),
                 ),
               ],
             ),
@@ -291,12 +183,7 @@ class _BannerFormDialogState extends State<BannerFormDialog> {
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-            const SizedBox(height: 8),
-
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
         ElevatedButton(
           onPressed: _isSaving ? null : _submit,
           child: _isSaving

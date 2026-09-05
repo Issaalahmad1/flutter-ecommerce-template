@@ -7,6 +7,8 @@ import '../../../product/presentation/widgets/product_grid.dart';
 import '../cubit/search_cubit.dart';
 import '../cubit/search_state.dart';
 import '../widgets/search_filter_sheet.dart';
+import '../widgets/search_text_field.dart';
+import '../widgets/top_searches.dart';
 
 class SearchScreen extends StatelessWidget {
   const SearchScreen({super.key});
@@ -62,7 +64,6 @@ class _SearchScreenBodyState extends State<_SearchScreenBody> {
 
   @override
   Widget build(BuildContext context) {
-    const brand = BrandConfig.decoze;
     final strings = context.strings;
 
     return Scaffold(
@@ -72,108 +73,16 @@ class _SearchScreenBodyState extends State<_SearchScreenBody> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    autofocus: true,
-
-                    textInputAction: TextInputAction.search,
-                    style: TextStyle(color: brand.textPrimary),
-                    decoration: InputDecoration(
-                      fillColor: brand.surface,
-                      hintText: strings.searchHint,
-                      hintStyle: TextStyle(color: brand.textSecondary),
-                      prefixIcon: IconButton(
-                        icon: Icon(Icons.search, color: brand.textSecondary),
-                        onPressed: () => _runSearch(_controller.text),
-                      ),
-                      suffixIcon: GestureDetector(
-                        onTap: _openFilters,
-                        child: Container(
-                          width: 36,
-                          height: 36,
-                          margin: const EdgeInsets.all(12),
-                          decoration:  BoxDecoration(
-                            color: brand.accent,
-                            borderRadius: BorderRadius.circular(100),
-                          ),
-                          child: Icon(Icons.tune, color: brand.onAccent),
-                        ),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(100),
-                        borderSide: BorderSide(
-                          color: const Color(0xff5A5D5F),
-                          width: 0.3,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(100),
-                        borderSide: BorderSide(
-                          color: const Color(0xff5A5D5F),
-                          width: 2,
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(100),
-                        borderSide: BorderSide(
-                          color: const Color(0xff5A5D5F),
-                          width: 0.8,
-                        ),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
-                    onSubmitted: _runSearch,
-                  ),
-                ),
-              ],
+            SearchTextField(
+              controller: _controller,
+              onSearch: () => _runSearch(_controller.text),
+              onOpenFilters: _openFilters,
+              onSubmitted: _runSearch,
             ),
             const SizedBox(height: 20),
             Expanded(
               child: BlocBuilder<SearchCubit, SearchState>(
-                builder: (context, state) {
-                  return switch (state) {
-                    SearchInitial() => _TopSearches(
-                      onTap: _runSearch,
-                      brand: brand,
-                    ),
-                    SearchLoading() => const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                    SearchError(:final message) => Center(
-                      child: Text(
-                        message,
-                        style: TextStyle(color: brand.textSecondary),
-                      ),
-                    ),
-                    SearchLoaded(:final results, :final query) =>
-                      results.isEmpty
-                          ? Center(
-                              child: Text(
-                                query.isEmpty
-                                    ? strings.noResultsForFilter
-                                    : strings.noResultsFor(query),
-                                style: TextStyle(color: brand.textSecondary),
-                              ),
-                            )
-                          : SingleChildScrollView(
-                              child: ProductGrid(
-                                products: results,
-                                onProductTap: (product) {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => ProductDetailScreen(
-                                        productId: product.id,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                  };
-                },
+                builder: (context, state) => _SearchResults(state: state, onSearch: _runSearch),
               ),
             ),
           ],
@@ -183,53 +92,37 @@ class _SearchScreenBodyState extends State<_SearchScreenBody> {
   }
 }
 
-class _TopSearches extends StatelessWidget {
-  final ValueChanged<String> onTap;
-  final BrandConfig brand;
+class _SearchResults extends StatelessWidget {
+  final SearchState state;
+  final ValueChanged<String> onSearch;
 
-  const _TopSearches({required this.onTap, required this.brand});
+  const _SearchResults({required this.state, required this.onSearch});
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            context.strings.topSearches,
-            style: TextStyle(
-              color: brand.textPrimary,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              for (final term in context.strings.topSearchSuggestions)
-                GestureDetector(
-                  onTap: () => onTap(term),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: brand.surface,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      term,
-                      style: TextStyle(color: brand.textPrimary),
-                    ),
-                  ),
+    const brand = BrandConfig.decoze;
+    final strings = context.strings;
+
+    return switch (state) {
+      SearchInitial() => TopSearches(onTap: onSearch),
+      SearchLoading() => const Center(child: CircularProgressIndicator()),
+      SearchError(:final message) =>
+        Center(child: Text(message, style: TextStyle(color: brand.textSecondary))),
+      SearchLoaded(:final results, :final query) => results.isEmpty
+          ? Center(
+              child: Text(
+                query.isEmpty ? strings.noResultsForFilter : strings.noResultsFor(query),
+                style: TextStyle(color: brand.textSecondary),
+              ),
+            )
+          : SingleChildScrollView(
+              child: ProductGrid(
+                products: results,
+                onProductTap: (product) => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => ProductDetailScreen(productId: product.id)),
                 ),
-            ],
-          ),
-        ],
-      ),
-    );
+              ),
+            ),
+    };
   }
 }

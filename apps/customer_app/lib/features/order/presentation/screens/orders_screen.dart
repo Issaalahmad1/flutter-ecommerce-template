@@ -16,8 +16,9 @@ class OrdersScreen extends StatelessWidget {
     final uid = authState is AuthAuthenticated ? authState.user.uid : '';
 
     return BlocProvider(
-      create: (_) => OrdersListCubit(orderRepository: OrderRepositoryImpl())
-        ..loadOrders(uid),
+      create: (_) =>
+          OrdersListCubit(orderRepository: OrderRepositoryImpl())
+            ..loadOrders(uid),
       child: const _OrdersScreenBody(),
     );
   }
@@ -45,18 +46,23 @@ class _OrdersScreenBody extends StatelessWidget {
       body: BlocBuilder<OrdersListCubit, OrdersListState>(
         builder: (context, state) {
           return switch (state) {
-            OrdersListInitial() || OrdersListLoading() =>
-              const Center(child: CircularProgressIndicator()),
+            OrdersListInitial() || OrdersListLoading() => const Center(
+              child: CircularProgressIndicator(),
+            ),
             OrdersListError(:final message) => Center(child: Text(message)),
-            OrdersListLoaded(:final orders) when orders.isEmpty =>
-              Center(child: Text(strings.noOrders)),
-            OrdersListLoaded(:final orders) => ListView.separated(
+            OrdersListLoaded(:final orders) when orders.isEmpty => Center(
+              child: Text(strings.noOrders),
+            ),
+            OrdersListLoaded(:final orders) => ResponsiveContent(
+              child: ListView.separated(
                 padding: const EdgeInsets.all(16),
                 itemCount: orders.length,
                 separatorBuilder: (_, _) => const Divider(height: 24),
                 itemBuilder: (context, index) {
                   final order = orders[index];
-                  final firstItem = order.items.isNotEmpty ? order.items.first : null;
+                  final firstItem = order.items.isNotEmpty
+                      ? order.items.first
+                      : null;
 
                   return Row(
                     children: [
@@ -88,7 +94,9 @@ class _OrdersScreenBody extends StatelessWidget {
                               firstItem?.name ?? 'Order #${order.id}',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontWeight: FontWeight.w600),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                             Text(
                               '${brand.currencySymbol} ${order.total.toStringAsFixed(2)}',
@@ -101,6 +109,7 @@ class _OrdersScreenBody extends StatelessWidget {
                   );
                 },
               ),
+            ),
           };
         },
       ),

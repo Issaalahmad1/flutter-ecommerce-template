@@ -36,53 +36,57 @@ class _CategoriesOverviewBody extends StatelessWidget {
             CategoriesOverviewError(:final message) => Center(
               child: Text(message),
             ),
-            CategoriesOverviewLoaded(:final categories) => GridView.builder(
-              padding: const EdgeInsets.all(16),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                childAspectRatio: 1.1,
-              ),
-              itemCount: categories.length,
-              itemBuilder: (context, index) {
-                final category = categories[index];
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => CategoryScreen(categoryId: category.id),
+            CategoriesOverviewLoaded(:final categories) => LayoutBuilder(
+              builder: (context, constraints) {
+                return GridView.builder(
+                  padding: const EdgeInsets.all(16),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: Responsive.productGridColumns(constraints.maxWidth),
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    childAspectRatio: 1.1,
+                  ),
+                  itemCount: categories.length,
+                  itemBuilder: (context, index) {
+                    final category = categories[index];
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => CategoryScreen(categoryId: category.id),
+                          ),
+                        );
+                      },
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            CategoryImage(
+                              imageUrl: category.imageUrl,
+                              size: 200,
+                              fit: BoxFit.cover,
+                            ),
+                            Positioned(
+                              left: 12,
+                              bottom: 12,
+                              child: Text(
+                                category.name,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  shadows: [
+                                    Shadow(blurRadius: 6, color: Colors.black),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(14),
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        CategoryImage(
-                          imageUrl: category.imageUrl,
-                          size: 200,
-                          fit: BoxFit.cover,
-                        ),
-                        Positioned(
-                          left: 12,
-                          bottom: 12,
-                          child: Text(
-                            category.name,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              shadows: [
-                                Shadow(blurRadius: 6, color: Colors.black),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 );
               },
             ),

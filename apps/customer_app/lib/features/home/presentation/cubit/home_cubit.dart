@@ -17,11 +17,11 @@ class HomeCubit extends Cubit<HomeState> {
     required ProductRepository productRepository,
     BannerRepository? bannerRepository,
     HomeCacheService? cacheService,
-  })  : _categoryRepository = categoryRepository,
-        _productRepository = productRepository,
-        _bannerRepository = bannerRepository ?? BannerRepositoryImpl(),
-        _cacheService = cacheService ?? HomeCacheService(),
-        super(const HomeInitial());
+  }) : _categoryRepository = categoryRepository,
+       _productRepository = productRepository,
+       _bannerRepository = bannerRepository ?? BannerRepositoryImpl(),
+       _cacheService = cacheService ?? HomeCacheService(),
+       super(const HomeInitial());
 
   Future<void> loadHome() async {
     // أول مرة بس (مفيش بيانات معروضة أصلاً) بنحاول نعرض آخر نسخة
@@ -31,11 +31,13 @@ class HomeCubit extends Cubit<HomeState> {
     if (state is HomeInitial) {
       final cached = await _cacheService.read();
       if (cached != null) {
-        emit(HomeLoaded(
-          categories: cached.categories,
-          allProducts: cached.allProducts,
-          banners: cached.banners,
-        ));
+        emit(
+          HomeLoaded(
+            categories: cached.categories,
+            allProducts: cached.allProducts,
+            banners: cached.banners,
+          ),
+        );
       } else {
         emit(const HomeLoading());
       }
@@ -52,17 +54,23 @@ class HomeCubit extends Cubit<HomeState> {
       final allProducts = results[1] as List<ProductEntity>;
       final banners = results[2] as List<BannerEntity>;
 
-      emit(HomeLoaded(
-        categories: categories,
-        allProducts: allProducts,
-        banners: banners,
-      ));
+      emit(
+        HomeLoaded(
+          categories: categories,
+          allProducts: allProducts,
+          banners: banners,
+        ),
+      );
 
-      unawaited(_cacheService.write(HomeCache(
-        categories: categories,
-        allProducts: allProducts,
-        banners: banners,
-      )));
+      unawaited(
+        _cacheService.write(
+          HomeCache(
+            categories: categories,
+            allProducts: allProducts,
+            banners: banners,
+          ),
+        ),
+      );
     } catch (e) {
       // لو عندنا بيانات معروضة بالفعل (من الكاش أو تحميل سابق) وفشل
       // التحديث، نسيبها زي ما هي بدل ما نستبدلها برسالة خطأ مفاجئة.

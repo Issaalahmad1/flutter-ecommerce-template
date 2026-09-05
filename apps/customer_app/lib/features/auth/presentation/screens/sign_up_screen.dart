@@ -57,7 +57,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           builder: (context, state) {
             final isLoading = state is AuthLoading;
 
-            return Center(
+            return ResponsiveContent(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Form(
@@ -65,7 +65,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: 26,
-                    children:<Widget> [
+                    children: <Widget>[
                       const SizedBox(height: 24),
                       Center(
                         child: Text(
@@ -164,14 +164,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               ),
                               onPressed: isLoading
                                   ? null
-                                  : () =>
-                                        context.read<AuthCubit>().signInWithTwitter(),
-                              child:  Container(
+                                  : () => context
+                                        .read<AuthCubit>()
+                                        .signInWithTwitter(),
+                              child: Container(
                                 decoration: BoxDecoration(
-                                  color:Colors.white,
+                                  color: Colors.white,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: Image.asset('assets/auth_icons/twitter.png', height:24, color: Colors.black)),
+                                child: Image.asset(
+                                  'assets/auth_icons/twitter.png',
+                                  height: 24,
+                                  color: Colors.black,
+                                ),
+                              ),
                             ),
                           ),
                           Expanded(
@@ -184,15 +190,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               ),
                               onPressed: isLoading
                                   ? null
-                                  : () =>
-                                        context.read<AuthCubit>().signInWithGoogle(),
-                              child:  Image.asset('assets/auth_icons/Google.png', height:24),
+                                  : () => context
+                                        .read<AuthCubit>()
+                                        .signInWithGoogle(),
+                              child: Image.asset(
+                                'assets/auth_icons/Google.png',
+                                height: 24,
+                              ),
                             ),
                           ),
-                          
                         ],
                       ),
-                      
+
                       Center(
                         child: TextButton(
                           onPressed: () {

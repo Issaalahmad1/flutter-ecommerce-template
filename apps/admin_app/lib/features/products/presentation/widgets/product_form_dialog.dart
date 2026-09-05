@@ -1,23 +1,11 @@
-
 import 'package:decoze_core/core.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-/// عنصر صورة واحد في المعرض — إما رابط قديم موجود بالفعل، أو بايتات
-/// صورة جديدة لسه في الذاكرة. الترتيب في القايمة بتاعة الفورم هو
-/// اللي بيحدد "مين الأساسية" (أول عنصر دايمًا).
-class _GalleryImage {
-  final String? existingUrl;
-  final Uint8List? bytes;
-
-  _GalleryImage.existing(this.existingUrl) : bytes = null;
-  _GalleryImage.picked(this.bytes) : existingUrl = null;
-
-  ImageProvider get provider => bytes != null
-      ? MemoryImage(bytes!)
-      : NetworkImage(existingUrl!) as ImageProvider;
-}
+import 'product_color_field.dart';
+import 'product_form_image.dart';
+import 'product_image_gallery_field.dart';
 
 class ProductFormDialog extends StatefulWidget {
   final List<CategoryEntity> categories;
@@ -45,7 +33,7 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
   late String? _selectedColor;
   late String? _selectedSubcategory;
 
-  final List<_GalleryImage> _images = [];
+  final List<ProductFormImage> _images = [];
   bool _isSaving = false;
 
   bool get _isEditing => widget.product != null;
@@ -62,21 +50,14 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
     super.initState();
     final product = widget.product;
     _nameController = TextEditingController(text: product?.name ?? '');
-    _descriptionController = TextEditingController(
-      text: product?.description ?? '',
-    );
-    _priceController = TextEditingController(
-      text: product?.price.toString() ?? '',
-    );
-    _stockController = TextEditingController(
-      text: product?.stock.toString() ?? '',
-    );
+    _descriptionController = TextEditingController(text: product?.description ?? '');
+    _priceController = TextEditingController(text: product?.price.toString() ?? '');
+    _stockController = TextEditingController(text: product?.stock.toString() ?? '');
     for (final url in product?.images ?? []) {
-      _images.add(_GalleryImage.existing(url));
+      _images.add(ProductFormImage.existing(url));
     }
     _selectedCategoryId =
-        product?.categoryId ??
-        (widget.categories.isNotEmpty ? widget.categories.first.id : null);
+        product?.categoryId ?? (widget.categories.isNotEmpty ? widget.categories.first.id : null);
     _selectedColor = product?.color;
     _selectedSubcategory = product?.subcategoryId;
   }
@@ -101,15 +82,13 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
     setState(() {
       for (final file in result.files) {
         if (file.bytes != null) {
-          _images.add(_GalleryImage.picked(file.bytes!));
+          _images.add(ProductFormImage.picked(file.bytes!));
         }
       }
     });
   }
 
-  void _removeImage(int index) {
-    setState(() => _images.removeAt(index));
-  }
+  void _removeImage(int index) => setState(() => _images.removeAt(index));
 
   /// بتنقل الصورة المختارة لأول مكان في القايمة، فتبقى هي "الأساسية"
   /// تلقائيًا (بما إن images[0] هي اللي بتُستخدم كصورة الكارت).
@@ -122,9 +101,7 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate() || _selectedCategoryId == null) {
-      return;
-    }
+    if (!_formKey.currentState!.validate() || _selectedCategoryId == null) return;
 
     if (_images.isEmpty) {
       ScaffoldMessenger.of(
@@ -135,8 +112,8 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
 
     setState(() => _isSaving = true);
 
-    // نرفع الصور الجديدة بس (اللي لسه بايتات في الذاكرة)، ونسيب
-    // الصور القديمة زي ما هي، مع الحفاظ على نفس ترتيب المعرض.
+    // نرفع الصور الجديدة بس (اللي لسه بايتات في الذاكرة)، ونسيب الصور
+    // القديمة زي ما هي، مع الحفاظ على نفس ترتيب المعرض.
     final storageRepository = StorageRepositoryImpl();
     final finalUrls = <String>[];
     for (var i = 0; i < _images.length; i++) {
@@ -145,10 +122,7 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
         finalUrls.add(image.existingUrl!);
       } else {
         final path = 'products/${DateTime.now().millisecondsSinceEpoch}_$i.jpg';
-        final url = await storageRepository.uploadImage(
-          bytes: image.bytes!,
-          path: path,
-        );
+        final url = await storageRepository.uploadImage(bytes: image.bytes!, path: path);
         finalUrls.add(url);
       }
     }
@@ -190,18 +164,14 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                 TextFormField(
                   controller: _nameController,
                   decoration: const InputDecoration(labelText: 'Product name'),
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'مطلوب' : null,
+                  validator: (v) => (v == null || v.trim().isEmpty) ? 'مطلوب' : null,
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
                   initialValue: _selectedCategoryId,
                   decoration: const InputDecoration(labelText: 'Category'),
                   items: widget.categories
-                      .map(
-                        (c) =>
-                            DropdownMenuItem(value: c.id, child: Text(c.name)),
-                      )
+                      .map((c) => DropdownMenuItem(value: c.id, child: Text(c.name)))
                       .toList(),
                   onChanged: (value) => setState(() {
                     _selectedCategoryId = value;
@@ -216,16 +186,13 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String?>(
                     initialValue: _selectedSubcategory,
-                    decoration: const InputDecoration(
-                      labelText: 'Subcategory (optional)',
-                    ),
+                    decoration: const InputDecoration(labelText: 'Subcategory (optional)'),
                     items: [
                       const DropdownMenuItem(value: null, child: Text('—')),
                       for (final sub in _currentSubcategories)
                         DropdownMenuItem(value: sub, child: Text(sub)),
                     ],
-                    onChanged: (value) =>
-                        setState(() => _selectedSubcategory = value),
+                    onChanged: (value) => setState(() => _selectedSubcategory = value),
                   ),
                 ],
                 const SizedBox(height: 12),
@@ -235,13 +202,9 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                       child: TextFormField(
                         controller: _priceController,
                         decoration: const InputDecoration(labelText: 'Price'),
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                            RegExp(r'^\d*\.?\d*$'),
-                          ),
+                          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
                         ],
                         validator: (v) {
                           final value = double.tryParse(v ?? '');
@@ -257,81 +220,22 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                         controller: _stockController,
                         decoration: const InputDecoration(labelText: 'Stock'),
                         keyboardType: TextInputType.number,
-                        validator: (v) => (int.tryParse(v ?? '') == null)
-                            ? 'رقم غير صحيح'
-                            : null,
+                        validator: (v) => (int.tryParse(v ?? '') == null) ? 'رقم غير صحيح' : null,
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
-                Text(
-                  'Color (optional)',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: [
-                    _ColorSwatch(
-                      color: null,
-                      isSelected: _selectedColor == null,
-                      onTap: () => setState(() => _selectedColor = null),
-                    ),
-                    for (final entry in ProductColorPalette.colors.entries)
-                      _ColorSwatch(
-                        color: ProductColorPalette.toColor(entry.value),
-                        label: entry.key,
-                        isSelected: _selectedColor == entry.value,
-                        onTap: () => setState(() => _selectedColor = entry.value),
-                      ),
-                  ],
+                ProductColorField(
+                  selectedColor: _selectedColor,
+                  onChanged: (value) => setState(() => _selectedColor = value),
                 ),
                 const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Text(
-                      'Product images',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    const SizedBox(width: 8),
-                    if (_images.isNotEmpty)
-                      Text(
-                        '(اضغط على النجمة لتحديد الصورة الأساسية)',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Theme.of(context).textTheme.bodySmall?.color,
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: [
-                    for (var i = 0; i < _images.length; i++)
-                      _ImageThumbnail(
-                        image: _images[i].provider,
-                        isPrimary: i == 0,
-                        onRemove: () => _removeImage(i),
-                        onSetPrimary: () => _setAsPrimary(i),
-                      ),
-                    GestureDetector(
-                      onTap: _pickImages,
-                      child: Container(
-                        width: 70,
-                        height: 70,
-                        decoration: BoxDecoration(
-                          color: Colors.black12,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.white24),
-                        ),
-                        child: const Icon(Icons.add_photo_alternate_outlined),
-                      ),
-                    ),
-                  ],
+                ProductImageGalleryField(
+                  images: _images,
+                  onPickImages: _pickImages,
+                  onRemove: _removeImage,
+                  onSetPrimary: _setAsPrimary,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -345,12 +249,7 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-            const SizedBox(height: 8),
-
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
         ElevatedButton(
           onPressed: _isSaving ? null : _submit,
           child: _isSaving
@@ -362,114 +261,6 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
               : const Text('Save'),
         ),
       ],
-    );
-  }
-}
-
-class _ImageThumbnail extends StatelessWidget {
-  final ImageProvider image;
-  final bool isPrimary;
-  final VoidCallback onRemove;
-  final VoidCallback onSetPrimary;
-
-  const _ImageThumbnail({
-    required this.image,
-    required this.isPrimary,
-    required this.onRemove,
-    required this.onSetPrimary,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 70,
-      height: 70,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Container(
-            width: 70,
-            height: 70,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              image: DecorationImage(image: image, fit: BoxFit.cover),
-              border: isPrimary
-                  ? Border.all(color: Colors.lightGreenAccent, width: 2)
-                  : null,
-            ),
-          ),
-          // نجمة تحديد "الأساسية" — تفضل ظاهرة دايمًا، لكن ملونة بس
-          // لو دي فعلاً الصورة الأساسية حاليًا.
-          Positioned(
-            bottom: 2,
-            left: 2,
-            child: GestureDetector(
-              onTap: onSetPrimary,
-              child: Icon(
-                isPrimary ? Icons.star : Icons.star_border,
-                size: 18,
-                color: isPrimary ? Colors.lightGreenAccent : Colors.white70,
-              ),
-            ),
-          ),
-          Positioned(
-            top: -6,
-            right: -6,
-            child: GestureDetector(
-              onTap: onRemove,
-              child: Container(
-                padding: const EdgeInsets.all(2),
-                decoration: const BoxDecoration(
-                  color: Colors.red,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.close, size: 14, color: Colors.white),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// دائرة لون واحدة قابلة للاختيار — لو [color] كان null، دي خيار
-/// "بدون لون" (زي X)، مفيدة للمنتجات اللي مالهاش لون محدد.
-class _ColorSwatch extends StatelessWidget {
-  final Color? color;
-  final String? label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _ColorSwatch({
-    required this.color,
-    required this.isSelected,
-    required this.onTap,
-    this.label,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Tooltip(
-        message: label ?? 'بدون لون',
-        child: Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: color ?? Colors.transparent,
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: isSelected ? Colors.lightGreenAccent : Colors.white24,
-              width: isSelected ? 2 : 1,
-            ),
-          ),
-          child: color == null
-              ? const Icon(Icons.close, size: 16, color: Colors.white54)
-              : null,
-        ),
-      ),
     );
   }
 }

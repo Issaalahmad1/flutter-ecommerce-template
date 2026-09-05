@@ -52,13 +52,15 @@ class _PaymentMethodBodyState extends State<_PaymentMethodBody> {
       id: '', // بيتجاهل — Firestore بيولّد الـ id الحقيقي وقت الحفظ.
       userId: authState.user.uid,
       items: cartState.items
-          .map((line) => OrderItemEntity(
-                productId: line.product.id,
-                name: line.product.name,
-                imageUrl: line.product.thumbnail,
-                price: line.product.price,
-                quantity: line.quantity,
-              ))
+          .map(
+            (line) => OrderItemEntity(
+              productId: line.product.id,
+              name: line.product.name,
+              imageUrl: line.product.thumbnail,
+              price: line.product.price,
+              quantity: line.quantity,
+            ),
+          )
           .toList(),
       subtotal: cartState.subtotal,
       tax: cartState.tax,
@@ -76,7 +78,9 @@ class _PaymentMethodBodyState extends State<_PaymentMethodBody> {
           isCompleted: true,
           timestamp: DateTime.now(),
         ),
-        const TrackingStepEntity(title: 'Order has been processed and is ready to be shipped'),
+        const TrackingStepEntity(
+          title: 'Order has been processed and is ready to be shipped',
+        ),
         const TrackingStepEntity(title: 'The delivery is on his way'),
         const TrackingStepEntity(title: 'Your order has been delivered'),
       ],
@@ -106,57 +110,59 @@ class _PaymentMethodBodyState extends State<_PaymentMethodBody> {
               ),
             );
           } else if (state is OrderError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
           }
         },
         builder: (context, state) {
           final isProcessing = state is OrderProcessing;
 
-          return Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  strings.selectPaymentMethod,
-                  style: const TextStyle(fontSize: 13),
-                ),
-                const SizedBox(height: 12),
-                RadioListTile<String>(
-                  value: 'card',
-                  groupValue: _selectedMethod,
-                  onChanged: (v) => setState(() => _selectedMethod = v!),
-                  title: const Text('•••• •••• •••• 4679'),
-                  activeColor: brand.accent,
-                ),
-                RadioListTile<String>(
-                  value: 'paypal',
-                  groupValue: _selectedMethod,
-                  onChanged: (v) => setState(() => _selectedMethod = v!),
-                  title: Text(strings.paypal),
-                  activeColor: brand.accent,
-                ),
-                RadioListTile<String>(
-                  value: 'cash',
-                  groupValue: _selectedMethod,
-                  onChanged: (v) => setState(() => _selectedMethod = v!),
-                  title: Text(strings.cashMoney),
-                  activeColor: brand.accent,
-                ),
-                const Spacer(),
-                ElevatedButton(
-                  onPressed: isProcessing ? null : () => _pay(context),
-                  child: isProcessing
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(strings.payment),
-                ),
-              ],
+          return ResponsiveContent(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    strings.selectPaymentMethod,
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                  const SizedBox(height: 12),
+                  RadioListTile<String>(
+                    value: 'card',
+                    groupValue: _selectedMethod,
+                    onChanged: (v) => setState(() => _selectedMethod = v!),
+                    title: const Text('•••• •••• •••• 4679'),
+                    activeColor: brand.accent,
+                  ),
+                  RadioListTile<String>(
+                    value: 'paypal',
+                    groupValue: _selectedMethod,
+                    onChanged: (v) => setState(() => _selectedMethod = v!),
+                    title: Text(strings.paypal),
+                    activeColor: brand.accent,
+                  ),
+                  RadioListTile<String>(
+                    value: 'cash',
+                    groupValue: _selectedMethod,
+                    onChanged: (v) => setState(() => _selectedMethod = v!),
+                    title: Text(strings.cashMoney),
+                    activeColor: brand.accent,
+                  ),
+                  const Spacer(),
+                  ElevatedButton(
+                    onPressed: isProcessing ? null : () => _pay(context),
+                    child: isProcessing
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(strings.payment),
+                  ),
+                ],
+              ),
             ),
           );
         },

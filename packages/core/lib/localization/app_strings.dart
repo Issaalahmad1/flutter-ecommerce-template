@@ -22,6 +22,16 @@ abstract class AppStrings {
   String get welcomeTagline;
   String get getStarted;
 
+  // شاشة الـ Onboarding (السلايدات بعد الترحيب)
+  String get onboardingTitle1;
+  String get onboardingDescription1;
+  String get onboardingTitle2;
+  String get onboardingDescription2;
+  String get onboardingTitle3;
+  String get onboardingDescription3;
+  String get next;
+  String get skip;
+
   // البحث
   String get search;
   String get searchHint;
@@ -225,6 +235,26 @@ class AppStringsAr implements AppStrings {
   String get welcomeTagline => 'صمّم مساحتك وتسوّق كل احتياجات الديكور';
   @override
   String get getStarted => 'ابدأ الآن';
+
+  @override
+  String get onboardingTitle1 => 'نظّم ديكورك وتسوّقك بكل سهولة مع decoze';
+  @override
+  String get onboardingDescription1 =>
+      'تنقّل بثقة في رحلة تصميم منزلك، ووصولك لمساحة أحلامك بأسلوب عملي وأنيق مع decoze';
+  @override
+  String get onboardingTitle2 => 'ابقَ على تواصل مع فريق التصميم في أي وقت ومن أي مكان';
+  @override
+  String get onboardingDescription2 =>
+      'في عالم الديكور المتغيّر باستمرار، التواصل مع فريق التصميم هو سر نجاحك مع decoze';
+  @override
+  String get onboardingTitle3 => 'اكتشف كل المزايا اللي بيقدّمها decoze';
+  @override
+  String get onboardingDescription3 =>
+      'استكشف مجموعة مزايا decoze المتنوعة واستفد منها لأقصى درجة';
+  @override
+  String get next => 'التالي';
+  @override
+  String get skip => 'تخطي';
 
   @override
   String get search => 'البحث';
@@ -562,6 +592,26 @@ class AppStringsEn implements AppStrings {
   String get welcomeTagline => 'Style your spaces & shop for all your decor needs';
   @override
   String get getStarted => 'Get Started';
+
+  @override
+  String get onboardingTitle1 => 'Effortlessly organize your decor and shopping with decoze';
+  @override
+  String get onboardingDescription1 =>
+      'Confidently navigate your decor journey, ensuring a stylish and productive path to your dream space with decoze';
+  @override
+  String get onboardingTitle2 => 'Stay connected with your design team anytime, anywhere';
+  @override
+  String get onboardingDescription2 =>
+      "In today's dynamic decor world, staying connected with your design team is key to success with decoze.";
+  @override
+  String get onboardingTitle3 => 'Discover all the features decoze has to offer';
+  @override
+  String get onboardingDescription3 =>
+      "Dive into decoze's multitude of features by exploring its diverse functionalities.";
+  @override
+  String get next => 'Next';
+  @override
+  String get skip => 'Skip';
 
   @override
   String get search => 'Search';

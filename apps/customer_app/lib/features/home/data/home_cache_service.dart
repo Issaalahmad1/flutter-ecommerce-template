@@ -31,22 +31,28 @@ class HomeCacheService {
       final json = jsonDecode(raw) as Map<String, dynamic>;
       return HomeCache(
         categories: (json['categories'] as List)
-            .map((e) => CategoryEntity.fromJson(
-                  e['id'] as String,
-                  e as Map<String, dynamic>,
-                ))
+            .map(
+              (e) => CategoryEntity.fromJson(
+                e['id'] as String,
+                e as Map<String, dynamic>,
+              ),
+            )
             .toList(),
         allProducts: (json['allProducts'] as List)
-            .map((e) => ProductEntity.fromJson(
-                  e['id'] as String,
-                  e as Map<String, dynamic>,
-                ))
+            .map(
+              (e) => ProductEntity.fromJson(
+                e['id'] as String,
+                e as Map<String, dynamic>,
+              ),
+            )
             .toList(),
         banners: (json['banners'] as List)
-            .map((e) => BannerEntity.fromJson(
-                  e['id'] as String,
-                  e as Map<String, dynamic>,
-                ))
+            .map(
+              (e) => BannerEntity.fromJson(
+                e['id'] as String,
+                e as Map<String, dynamic>,
+              ),
+            )
             .toList(),
       );
     } catch (_) {
@@ -59,8 +65,12 @@ class HomeCacheService {
   Future<void> write(HomeCache cache) async {
     final prefs = await SharedPreferences.getInstance();
     final json = {
-      'categories': cache.categories.map((c) => {...c.toJson(), 'id': c.id}).toList(),
-      'allProducts': cache.allProducts.map((p) => {...p.toJson(), 'id': p.id}).toList(),
+      'categories': cache.categories
+          .map((c) => {...c.toJson(), 'id': c.id})
+          .toList(),
+      'allProducts': cache.allProducts
+          .map((p) => {...p.toJson(), 'id': p.id})
+          .toList(),
       'banners': cache.banners.map((b) => {...b.toJson(), 'id': b.id}).toList(),
     };
     await prefs.setString(_key, jsonEncode(json));

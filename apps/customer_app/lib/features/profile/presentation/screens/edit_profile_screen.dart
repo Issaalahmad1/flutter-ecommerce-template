@@ -83,18 +83,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
       if (!mounted) return;
       await context.read<AuthCubit>().updateProfile(
-            firstName: _firstNameController.text.trim(),
-            lastName: _lastNameController.text.trim(),
-            phone: _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
-            dob: _dob,
-            gender: _gender,
-            photoUrl: photoUrl,
-          );
+        firstName: _firstNameController.text.trim(),
+        lastName: _lastNameController.text.trim(),
+        phone: _phoneController.text.trim().isEmpty
+            ? null
+            : _phoneController.text.trim(),
+        dob: _dob,
+        gender: _gender,
+        photoUrl: photoUrl,
+      );
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.strings.profileUpdated)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.strings.profileUpdated)));
       Navigator.of(context).pop();
     } catch (e) {
       if (!mounted) return;
@@ -110,102 +112,127 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(strings.editProfileTitle)),
       body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            padding: const EdgeInsets.all(20),
-            children: [
-              Center(
-                child: GestureDetector(
-                  onTap: _pickImage,
-                  child: Stack(
-                    children: [
-                      CircleAvatar(
-                        radius: 50,
-                        backgroundColor: brand.surface,
-                        backgroundImage: _pickedImageBytes != null
-                            ? MemoryImage(_pickedImageBytes!)
-                            : (widget.user.photoUrl != null
-                                ? NetworkImage(widget.user.photoUrl!)
-                                : null) as ImageProvider?,
-                        child: _pickedImageBytes == null && widget.user.photoUrl == null
-                            ? Icon(Icons.person, size: 50, color: brand.textSecondary)
-                            : null,
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: brand.accent,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: brand.primaryBackground, width: 2),
-                          ),
-                          child: Icon(Icons.edit, size: 16, color: brand.onAccent),
+        child: ResponsiveContent(
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              padding: const EdgeInsets.all(20),
+              children: [
+                Center(
+                  child: GestureDetector(
+                    onTap: _pickImage,
+                    child: Stack(
+                      children: [
+                        CircleAvatar(
+                          radius: 50,
+                          backgroundColor: brand.surface,
+                          backgroundImage: _pickedImageBytes != null
+                              ? MemoryImage(_pickedImageBytes!)
+                              : (widget.user.photoUrl != null
+                                        ? NetworkImage(widget.user.photoUrl!)
+                                        : null)
+                                    as ImageProvider?,
+                          child:
+                              _pickedImageBytes == null &&
+                                  widget.user.photoUrl == null
+                              ? Icon(
+                                  Icons.person,
+                                  size: 50,
+                                  color: brand.textSecondary,
+                                )
+                              : null,
                         ),
-                      ),
-                    ],
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: brand.accent,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: brand.primaryBackground,
+                                width: 2,
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.edit,
+                              size: 16,
+                              color: brand.onAccent,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 32),
-              TextFormField(
-                controller: _firstNameController,
-                decoration: InputDecoration(labelText: strings.firstNameHint),
-                validator: (v) => (v == null || v.trim().isEmpty) ? strings.fieldRequired : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _lastNameController,
-                decoration: InputDecoration(labelText: strings.lastNameHint),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                initialValue: widget.user.email,
-                enabled: false,
-                decoration: InputDecoration(labelText: strings.emailHint),
-              ),
-              const SizedBox(height: 16),
-              InkWell(
-                onTap: _pickDob,
-                child: InputDecorator(
-                  decoration: InputDecoration(labelText: strings.dateOfBirthHint),
-                  child: Text(
-                    _dob == null
-                        ? ''
-                        : '${_dob!.year}-${_dob!.month.toString().padLeft(2, '0')}-${_dob!.day.toString().padLeft(2, '0')}',
+                const SizedBox(height: 32),
+                TextFormField(
+                  controller: _firstNameController,
+                  decoration: InputDecoration(labelText: strings.firstNameHint),
+                  validator: (v) => (v == null || v.trim().isEmpty)
+                      ? strings.fieldRequired
+                      : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _lastNameController,
+                  decoration: InputDecoration(labelText: strings.lastNameHint),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  initialValue: widget.user.email,
+                  enabled: false,
+                  decoration: InputDecoration(labelText: strings.emailHint),
+                ),
+                const SizedBox(height: 16),
+                InkWell(
+                  onTap: _pickDob,
+                  child: InputDecorator(
+                    decoration: InputDecoration(
+                      labelText: strings.dateOfBirthHint,
+                    ),
+                    child: Text(
+                      _dob == null
+                          ? ''
+                          : '${_dob!.year}-${_dob!.month.toString().padLeft(2, '0')}-${_dob!.day.toString().padLeft(2, '0')}',
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _phoneController,
-                keyboardType: TextInputType.phone,
-                decoration: InputDecoration(labelText: strings.phoneNumberHint),
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                initialValue: _gender,
-                decoration: InputDecoration(labelText: strings.genderHint),
-                items: [
-                  DropdownMenuItem(value: 'male', child: Text(strings.male)),
-                  DropdownMenuItem(value: 'female', child: Text(strings.female)),
-                ],
-                onChanged: (value) => setState(() => _gender = value),
-              ),
-              const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _isSaving ? null : _submit,
-                child: _isSaving
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Text(strings.continueLabel),
-              ),
-            ],
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  decoration: InputDecoration(
+                    labelText: strings.phoneNumberHint,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  initialValue: _gender,
+                  decoration: InputDecoration(labelText: strings.genderHint),
+                  items: [
+                    DropdownMenuItem(value: 'male', child: Text(strings.male)),
+                    DropdownMenuItem(
+                      value: 'female',
+                      child: Text(strings.female),
+                    ),
+                  ],
+                  onChanged: (value) => setState(() => _gender = value),
+                ),
+                const SizedBox(height: 32),
+                ElevatedButton(
+                  onPressed: _isSaving ? null : _submit,
+                  child: _isSaving
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(strings.continueLabel),
+                ),
+              ],
+            ),
           ),
         ),
       ),

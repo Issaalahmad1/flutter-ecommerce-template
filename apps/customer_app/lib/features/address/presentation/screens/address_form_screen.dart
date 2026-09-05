@@ -81,10 +81,15 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
       area: _areaController.text.trim(),
       street: _streetController.text.trim(),
       buildingNumber: _buildingController.text.trim(),
-      floor: _floorController.text.trim().isEmpty ? null : _floorController.text.trim(),
-      apartment:
-          _apartmentController.text.trim().isEmpty ? null : _apartmentController.text.trim(),
-      landmark: _landmarkController.text.trim().isEmpty ? null : _landmarkController.text.trim(),
+      floor: _floorController.text.trim().isEmpty
+          ? null
+          : _floorController.text.trim(),
+      apartment: _apartmentController.text.trim().isEmpty
+          ? null
+          : _apartmentController.text.trim(),
+      landmark: _landmarkController.text.trim().isEmpty
+          ? null
+          : _landmarkController.text.trim(),
       isDefault: widget.existing?.isDefault ?? false,
     );
 
@@ -96,9 +101,9 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
     }
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.strings.addressSaved)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(context.strings.addressSaved)));
     Navigator.of(context).pop();
   }
 
@@ -107,111 +112,124 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
     final strings = context.strings;
 
     return Scaffold(
-      appBar: AppBar(title: Text(_isEditing ? strings.editAddress : strings.addAddress)),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
-            TextFormField(
-              controller: _labelController,
-              decoration: InputDecoration(labelText: strings.addressLabelHint),
-              validator: _required(strings),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _fullNameController,
-              decoration: InputDecoration(labelText: strings.fullNameHint),
-              validator: _required(strings),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _phoneController,
-              keyboardType: TextInputType.phone,
-              decoration: InputDecoration(labelText: strings.phoneNumberHint),
-              validator: _required(strings),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _countryController,
-                    decoration: InputDecoration(labelText: strings.countryHint),
-                    validator: _required(strings),
-                  ),
+      appBar: AppBar(
+        title: Text(_isEditing ? strings.editAddress : strings.addAddress),
+      ),
+      body: ResponsiveContent(
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            padding: const EdgeInsets.all(20),
+            children: [
+              TextFormField(
+                controller: _labelController,
+                decoration: InputDecoration(
+                  labelText: strings.addressLabelHint,
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextFormField(
-                    controller: _cityController,
-                    decoration: InputDecoration(labelText: strings.cityHint),
-                    validator: _required(strings),
+                validator: _required(strings),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _fullNameController,
+                decoration: InputDecoration(labelText: strings.fullNameHint),
+                validator: _required(strings),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _phoneController,
+                keyboardType: TextInputType.phone,
+                decoration: InputDecoration(labelText: strings.phoneNumberHint),
+                validator: _required(strings),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _countryController,
+                      decoration: InputDecoration(
+                        labelText: strings.countryHint,
+                      ),
+                      validator: _required(strings),
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _areaController,
-              decoration: InputDecoration(labelText: strings.areaHint),
-              validator: _required(strings),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _streetController,
-              decoration: InputDecoration(labelText: strings.streetHint),
-              validator: _required(strings),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _buildingController,
-                    decoration: InputDecoration(labelText: strings.buildingNumberHint),
-                    validator: _required(strings),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _cityController,
+                      decoration: InputDecoration(labelText: strings.cityHint),
+                      validator: _required(strings),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextFormField(
-                    controller: _floorController,
-                    decoration: InputDecoration(labelText: strings.floorHint),
+                ],
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _areaController,
+                decoration: InputDecoration(labelText: strings.areaHint),
+                validator: _required(strings),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _streetController,
+                decoration: InputDecoration(labelText: strings.streetHint),
+                validator: _required(strings),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _buildingController,
+                      decoration: InputDecoration(
+                        labelText: strings.buildingNumberHint,
+                      ),
+                      validator: _required(strings),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextFormField(
-                    controller: _apartmentController,
-                    decoration: InputDecoration(labelText: strings.apartmentHint),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _floorController,
+                      decoration: InputDecoration(labelText: strings.floorHint),
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _landmarkController,
-              decoration: InputDecoration(labelText: strings.landmarkHint),
-            ),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: _isSaving ? null : _submit,
-              child: _isSaving
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(strings.continueLabel),
-            ),
-          ],
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _apartmentController,
+                      decoration: InputDecoration(
+                        labelText: strings.apartmentHint,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _landmarkController,
+                decoration: InputDecoration(labelText: strings.landmarkHint),
+              ),
+              const SizedBox(height: 32),
+              ElevatedButton(
+                onPressed: _isSaving ? null : _submit,
+                child: _isSaving
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(strings.continueLabel),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   String? Function(String?) _required(AppStrings strings) {
-    return (v) => (v == null || v.trim().isEmpty) ? strings.fieldRequired : null;
+    return (v) =>
+        (v == null || v.trim().isEmpty) ? strings.fieldRequired : null;
   }
 }

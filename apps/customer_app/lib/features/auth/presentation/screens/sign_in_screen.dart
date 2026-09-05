@@ -55,84 +55,87 @@ class _SignInScreenState extends State<SignInScreen> {
           builder: (context, state) {
             final isLoading = state is AuthLoading;
 
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 26,
-                  children: <Widget>[
-                    const SizedBox(height: 24),
-                    Center(
-                      child: Text(
-                        strings.loginTo(brand.appName),
-                        style: Theme.of(context).textTheme.headlineSmall,
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    TextFormField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        hintText: strings.emailHint,
-                        prefixIcon: const Icon(Icons.mail_outline),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return strings.emailRequired;
-                        }
-                        if (!value.contains('@')) {
-                          return strings.emailInvalid;
-                        }
-                        return null;
-                      },
-                    ),
-                    TextFormField(
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      decoration: InputDecoration(
-                        hintText: strings.passwordHint,
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-                          ),
-                          onPressed: () => setState(
-                            () => _obscurePassword = !_obscurePassword,
-                          ),
+            return ResponsiveContent(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 26,
+                    children: <Widget>[
+                      const SizedBox(height: 24),
+                      Center(
+                        child: Text(
+                          strings.loginTo(brand.appName),
+                          style: Theme.of(context).textTheme.headlineSmall,
                         ),
                       ),
-                      validator: (value) {
-                        if (value == null || value.length < 6) {
-                          return strings.passwordTooShort;
-                        }
-                        return null;
-                      },
-                    ),
-                    ElevatedButton(
-                      onPressed: isLoading ? null : _submit,
-                      child: isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(strings.signIn),
-                    ),
-                    Row(
-                      children: [
-                        const Expanded(child: Divider()),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: Text(strings.orContinueWith),
+                      const SizedBox(height: 32),
+                      TextFormField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                          hintText: strings.emailHint,
+                          prefixIcon: const Icon(Icons.mail_outline),
                         ),
-                        const Expanded(child: Divider()),
-                      ],
-                    ),
-                    Row(
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return strings.emailRequired;
+                          }
+                          if (!value.contains('@')) {
+                            return strings.emailInvalid;
+                          }
+                          return null;
+                        },
+                      ),
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: _obscurePassword,
+                        decoration: InputDecoration(
+                          hintText: strings.passwordHint,
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                            ),
+                            onPressed: () => setState(
+                              () => _obscurePassword = !_obscurePassword,
+                            ),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.length < 6) {
+                            return strings.passwordTooShort;
+                          }
+                          return null;
+                        },
+                      ),
+                      ElevatedButton(
+                        onPressed: isLoading ? null : _submit,
+                        child: isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Text(strings.signIn),
+                      ),
+                      Row(
+                        children: [
+                          const Expanded(child: Divider()),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: Text(strings.orContinueWith),
+                          ),
+                          const Expanded(child: Divider()),
+                        ],
+                      ),
+                      Row(
                         spacing: 24,
                         children: [
                           Expanded(
@@ -145,14 +148,19 @@ class _SignInScreenState extends State<SignInScreen> {
                               ),
                               onPressed: isLoading
                                   ? null
-                                  : () =>
-                                        context.read<AuthCubit>().signInWithTwitter(),
-                              child:  Container(
+                                  : () => context
+                                        .read<AuthCubit>()
+                                        .signInWithTwitter(),
+                              child: Container(
                                 decoration: BoxDecoration(
-                                  color:Colors.white,
+                                  color: Colors.white,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: Image.asset('assets/auth_icons/twitter.png', height:24)),
+                                child: Image.asset(
+                                  'assets/auth_icons/twitter.png',
+                                  height: 24,
+                                ),
+                              ),
                             ),
                           ),
                           Expanded(
@@ -165,24 +173,28 @@ class _SignInScreenState extends State<SignInScreen> {
                               ),
                               onPressed: isLoading
                                   ? null
-                                  : () =>
-                                        context.read<AuthCubit>().signInWithGoogle(),
-                              child:  Image.asset('assets/auth_icons/Google.png', height:24),
+                                  : () => context
+                                        .read<AuthCubit>()
+                                        .signInWithGoogle(),
+                              child: Image.asset(
+                                'assets/auth_icons/Google.png',
+                                height: 24,
+                              ),
                             ),
                           ),
-                          
                         ],
                       ),
-                    Center(
-                      child: TextButton(
-                        onPressed: () {
-                          context.go('/sign-up');
-                        },
-                        child: Text(strings.dontHaveAccount),
+                      Center(
+                        child: TextButton(
+                          onPressed: () {
+                            context.go('/sign-up');
+                          },
+                          child: Text(strings.dontHaveAccount),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 40),
-                  ],
+                      const SizedBox(height: 40),
+                    ],
+                  ),
                 ),
               ),
             );
