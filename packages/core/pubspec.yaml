@@ -1,6 +1,6 @@
 name: decoze_core
 resolution: workspace
-description: "A new Flutter package project."
+description: "Shared entities, repository contracts/implementations, and theming for the decoze customer and admin apps."
 version: 0.1.0
 homepage:
 

@@ -1,39 +1,31 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# decoze_core
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/tools/pub/writing-package-pages).
+The shared package behind the `decoze` monorepo — everything the `customer_app` and `admin_app` have in common lives here, so data access and domain logic are written **once** and consumed by both. See the [root README](../../README.md) for the full project overview and setup guide.
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/to/develop-packages).
--->
+## What's in here
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
-
-## Features
-
-TODO: List what your package can do. Maybe include images, gifs, or videos.
-
-## Getting started
-
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+```
+lib/
+├── entities/           # Domain models (Product, Category, Order, User, Banner, Review, ...)
+├── repositories/        # Abstract repository contracts
+├── repositories_impl/   # Concrete Firestore / Storage / Firebase AI implementations
+├── datasources/          # Low-level Firestore/Storage/Auth data sources
+├── localization/         # AppStrings (Arabic/English) + the localization delegate
+├── theme/                # BrandConfig and AppTheme
+├── widgets/              # Shared UI widgets used by both apps
+├── utils/                # Shared helpers
+└── config/               # Per-project credentials not covered by `flutterfire configure`
+                           # (app_config.dart is git-ignored; see app_config.example.dart)
+```
 
 ## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
+Both apps depend on this package as a local path dependency:
 
-```dart
-const like = 'sample';
+```yaml
+dependencies:
+  decoze_core:
+    path: ../../packages/core
 ```
 
-## Additional information
-
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+There's no independent versioning or publishing story — it's an internal workspace package, not published to pub.dev.

@@ -1,5 +1,9 @@
 # decoze — Flutter E-commerce Template
 
+[![Flutter](https://img.shields.io/badge/Flutter-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
+[![Firebase](https://img.shields.io/badge/Firebase-FFCA28?logo=firebase&logoColor=black)](https://firebase.google.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 A production-quality, full-stack e-commerce starter kit built with **Flutter**, **Firebase**, and **Clean Architecture** — a customer-facing mobile app and a web-based admin dashboard that share a single codebase.
 
 > This repository is a **template**, not a live store. `decoze` is the example brand shown throughout — every screen, entity, and Firebase collection is generic enough to rebrand for clothing, furniture, electronics, a hotel/room catalog, or any other product-based business. See [Use as your own template](#use-as-your-own-template) below. Nothing in this repo is wired to any specific person's Firebase project or API keys — every credential is supplied by whoever sets it up, following the steps below.
@@ -179,4 +183,4 @@ This is a template repository — see the setup steps above for configuration he
 
 ## License
 
-See [LICENSE](LICENSE). If you're distributing this template commercially (e.g. via a marketplace), replace this section and the LICENSE file with the terms that fit that distribution channel before publishing.
+MIT — see [LICENSE](LICENSE). If you're distributing your fork commercially (e.g. via a marketplace), replace this section and the LICENSE file with the terms that fit that distribution channel before publishing.
